@@ -1,17 +1,284 @@
 <!DOCTYPE html>
-<html lang="">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Clicker Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Общие стили */
+        body {
+            margin: 0;
+            font-family: 'Press Start 2P', sans-serif; /* Явно указываем шрифт */
+            background: #2d013d; /* Темный фиолетовый */
+            color: #e0c3fc; /* Светлый пастельный фиолетовый */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Баланс и кнопка прокачки */
+        .balance, .upgrade-button {
+            background: #6a1b9a;
+            padding: 15px;
+            border: 2px solid #e0c3fc;
+            color: #e0c3fc;
+            font-size: 14px;
+            font-family: 'Press Start 2P', sans-serif;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .balance {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .upgrade-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+
+        .upgrade-button:hover, .balance:hover {
+            background: #e0c3fc;
+            color: #6a1b9a;
+        }
+
+        .upgrade-button:active, .balance:active {
+            transform: scale(0.9);
+        }
+
+        /* Центральная секция */
+        .container {
+            text-align: center;
+            width: 100%;
+            margin-top: 50px;
+        }
+
+        .main-button {
+            width: 200px;
+            height: 200px;
+            background: #6a1b9a;
+            color: #e0c3fc;
+            font-size: 16px;
+            font-family: 'Press Start 2P', sans-serif;
+            border: 4px solid #e0c3fc;
+            margin: 20px auto;
+            cursor: pointer;
+            display: block;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .main-button:hover {
+            background: #e0c3fc;
+            color: #6a1b9a;
+        }
+
+        .main-button:active {
+            transform: scale(0.9);
+        }
+
+        .sub-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px auto 0;
+        }
+
+        .sub-button {
+            width: 180px;
+            padding: 15px;
+            background: #6a1b9a;
+            color: #e0c3fc;
+            border: 2px solid #e0c3fc;
+            font-size: 14px;
+            font-family: 'Press Start 2P', sans-serif;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .sub-button:hover {
+            background: #e0c3fc;
+            color: #6a1b9a;
+        }
+
+        .sub-button:active {
+            transform: scale(0.9);
+        }
+
+        .mini-button {
+            width: 100px;
+            right: 5px;
+            padding: 5px;
+            background: #6a1b9a;
+            color: #e0c3fc;
+            border: 2px solid #e0c3fc;
+            font-size: 10px;
+            font-family: 'Press Start 2P', sans-serif;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .mini-button:hover {
+            background: #e0c3fc;
+            color: #6a1b9a;
+        }
+
+        .mini-button:active {
+            transform: scale(0.9);
+        }
+
+        /* Ввод и вероятность */
+        .input-container {
+            top: 10px;
+            margin: 30px auto;
+            text-align: center;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 90%;
+            align-items: center;
+        }
+
+        .input-container span {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .input-container input {
+            width: 120px;
+            padding: 15px;
+            border: 2px solid #e0c3fc;
+            background: #6a1b9a;
+            color: #e0c3fc;
+            font-family: 'Press Start 2P', sans-serif;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .bet-row{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* Анимация */
+        .animation-section {
+            background: #3a015c; /* Темный фиолетовый */
+            border: 4px solid #e0c3fc;
+            width: 100%;
+            height: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #2d013d;
+            padding: 20px;
+            border: 4px solid #e0c3fc;
+            z-index: 10;
+        }
+
+        .modal h2 {
+            font-size: 14px;
+            font-family: 'Press Start 2P', sans-serif;
+        }
+
+        .modal-content {
+            margin-top: 20px;
+        }
+
+        .modal-content button {
+            font-family: 'Press Start 2P', sans-serif;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 5;
+        }
+    </style>
+</head>
+<body>
+<div class="balance">Balance: $100</div>
+<div class="upgrade-button" id="open-upgrade">Upgrade</div>
+<div class="container">
+    <button class="main-button">Click Me!</button>
+
+</div>
+<div class="animation-section">
+    <div class="input-container">
+        <button class="sub-button" id="open-enemy">Choose Enemy</button>
+        <div class="bet-row">
+            <span>Win Rate: 75%</span>
+            <input type="text" placeholder="Bet Amount">
+        </div>
+        <button class="sub-button">Start Fight</button>
+    </div>
+    <p>Animation Placeholder</p>
+</div>
+
+<!-- Enemy Modal -->
+<div class="modal" id="enemy-modal">
+    <h2>Choose Your Enemy</h2>
+    <div class="modal-content">
+        <p>Enemy 1 - Speed: 5, Strength: 8, Durability: 7 <button class="mini-button">Select</button></p>
+        <p>Enemy 2 - Speed: 7, Strength: 6, Durability: 5 <button class="mini-button">Select</button></p>
+        <p>Enemy 3 - Speed: 4, Strength: 9, Durability: 6 <button class="mini-button">Select</button></p>
+    </div>
+</div>
+
+<!-- Upgrade Modal -->
+<div class="modal" id="upgrade-modal">
+    <h2>Upgrade Your Character</h2>
+    <div class="modal-content">
+        <p>Speed: 5 <button class="mini-button">Upgrade</button></p>
+        <p>Strength: 8 <button class="mini-button">Upgrade</button></p>
+        <p>Durability: 7 <button class="mini-button">Upgrade</button></p>
+    </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<script>
+    const enemyModal = document.getElementById('enemy-modal');
+    const upgradeModal = document.getElementById('upgrade-modal');
+    const overlay = document.getElementById('overlay');
+
+    document.getElementById('open-enemy').addEventListener('click', () => {
+        enemyModal.style.display = 'block';
+        overlay.style.display = 'block';
+    });
+
+    document.getElementById('open-upgrade').addEventListener('click', () => {
+        upgradeModal.style.display = 'block';
+        overlay.style.display = 'block';
+    });
+
+    overlay.addEventListener('click', () => {
+        enemyModal.style.display = 'none';
+        upgradeModal.style.display = 'none';
+        overlay.style.display = 'none';
+    });
+</script>
+</body>
 </html>
