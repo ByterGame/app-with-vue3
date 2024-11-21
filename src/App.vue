@@ -1,18 +1,19 @@
 <template>
+  <div class="clicker-section">
 <div class="balance"><div class="little-button"><a>Balance: $ {{balance}}</a></div></div>
 <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade"><div class="little-button" id="open-upgrade"><a>Upgrade</a></div></div>
 <div class="container">
     <div class="button" @click="addMoney"><a>Click Me!</a></div>
-
+</div>
 </div>
 <div class="animation-section">
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy"><a>Choose Enemy</a></div>
         <div class="bet-row">
             <span>Win Rate: 75%</span>
-            <input type="text" placeholder="Bet Amount">
+            <input type="number" v-model="bet" min="0" v-bind:max="balance">
         </div>
-        <div class="little-button "><a>Start Fight</a></div>
+        <div class="little-button" @click="makeBet"><a>Start Fight</a></div>
     </div>
     <div class="animation-placeholder">
     </div>
@@ -32,9 +33,9 @@
 <div v-if="isUpgradeModalVisible" class="modal" id="upgrade-modal">
     <h2>Upgrade Your Character</h2>
     <div class="modal-content">
-        <p>Speed: 5 </p><div class="super-little-button"><a>Upgrade</a></div>
-        <p>Strength: 8 </p><div class="super-little-button"><a>Upgrade</a></div>
-        <p>Durability: 7 </p><div class="super-little-button"><a>Upgrade</a></div>
+        <p>Speed: {{character.speed}} </p><div class="super-little-button"><a>Upgrade</a></div>
+        <p>Strength: {{character.strength}} </p><div class="super-little-button"><a>Upgrade</a></div>
+        <p>Durability: {{character.durability}} </p><div class="super-little-button"><a>Upgrade</a></div>
     </div>
 </div>
 
@@ -47,10 +48,16 @@ export default {
   data() {
     return{
       balance: 0,
+      bet: 0,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
-    }
-  },
+      character:{
+          speed: 1,
+          strength: 1,
+          durability: 1,
+        }
+      }
+    },
 
   computed: {
     isModalVisible() {
@@ -71,7 +78,13 @@ export default {
     closeModals() {
       this.isEnemyModalVisible = false;
       this.isUpgradeModalVisible = false;
-    }
+    },
+    makeBet(){
+      if(this.bet > 0){
+        this.balance -= this.bet;
+      this.bet = 0;
+      }
+    },
   }
 
 }
@@ -79,16 +92,14 @@ export default {
 </script>
 
 <style>
-        /* Общие стили */
         body {
             margin: 0;
-            font-family: 'Press Start 2P', sans-serif; /* Явно указываем шрифт */
-            //background: transparent; /* Темный фиолетовый */
+            font-family: 'Press Start 2P', sans-serif;
             background-image: url("assets/background2.png");
             background-repeat: repeat-x;
             background-size: cover;
             background-position: bottom center;
-            color: #d6c6dd; /* Светлый пастельный фиолетовый */
+            color: #d6c6dd;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -96,6 +107,14 @@ export default {
             height: 100vh;
             overflow: hidden;
             user-select: none;
+        }
+        .clicker-section{
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 40%;
+          align-content: center;
+          justify-content: space-between;
         }
 
         .balance {
@@ -266,7 +285,7 @@ export default {
           text-decoration:none;
           background-color:#d6c6dd;
           display:block;
-            position:relative;
+          position:relative;
           padding: 10px 12px;
 
           -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -311,7 +330,7 @@ export default {
           border-radius: 2px;
         }
 
-                .animation-placeholder {
+        .animation-placeholder {
           width: 240px; /* Размеры контейнера анимации */
           height: 240px;
           bottom: 50px;
@@ -319,10 +338,9 @@ export default {
           background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
           background-size: cover;
           background-position: center;
-          animation: loop-animation 1.2s steps(6) infinite; /* Анимация */
+          animation: loop-animation 1.2s steps(6) infinite;
         }
 
-        /* Определяем анимацию */
         @keyframes loop-animation {
           0% {
             background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
@@ -348,7 +366,6 @@ export default {
 
         }
 
-        /* Ввод и вероятность */
         .input-container {
             top: 10px;
             margin: 30px auto;
@@ -389,19 +406,17 @@ export default {
             gap: 20px;
         }
 
-        /* Анимация */
         .animation-section {
-            background: transparent; /* Темный фиолетовый */
+            background: transparent;
             border: 0px solid #e0c3fc;
             width: 100%;
-            height: 50%;
+            height: 60%;
             bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Модальные окна */
         .modal {
             position: fixed;
             top: 50%;
@@ -428,7 +443,7 @@ export default {
         }
 
         .overlay {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             display: block;
