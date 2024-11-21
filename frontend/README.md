@@ -1,4 +1,4 @@
-# app-with-vue3
+# frontend
 
 ## Project setup
 ```
