@@ -22,10 +22,12 @@
 <!-- Enemy Modal -->
 <div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal">
     <h2>Choose Your Enemy</h2>
-    <div class="modal-content">
-        <p>Enemy 1 - Speed: 5, Strength: 8, Durability: 7 </p><div class="super-little-button"><a>Select</a></div>
-        <p>Enemy 2 - Speed: 7, Strength: 6, Durability: 5 </p><div class="super-little-button"><a>Select</a></div>
-        <p>Enemy 3 - Speed: 4, Strength: 9, Durability: 6 </p><div class="super-little-button"><a>Select</a></div>
+    <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
+        <p>
+            Enemy {{enemy.name}} - Speed: {{enemy.speed}}, Strength: {{enemy.strength}}, Durability: {{enemy.durability}}
+        </p>
+        <div class="super-little-button"><a>Select</a></div>
+        <div class="enemy_animation-placeholder"></div>
     </div>
 </div>
 
@@ -51,6 +53,11 @@ export default {
       bet: 0,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
+      enemies:[
+        {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7},
+        {id: 2, name: 'Dead', speed: 7, strength: 5, durability: 5},
+        {id: 3, name: 'Flying eye', speed: 4, strength: 9, durability: 6}
+      ],
       character:{
           speed: 1,
           strength: 1,
@@ -152,7 +159,7 @@ export default {
         .button a{
           color: #d6c6dd;
           font-family: 'Press Start 2P', sans-serif;
-          //font-weight:bold;
+          /*font-weight:bold;*/
           font-size:24px;
           text-align: center;
           text-decoration:none;
@@ -216,7 +223,7 @@ export default {
         .little-button a{
           color: #d6c6dd;
           font-family: 'Press Start 2P', sans-serif;
-          //font-weight:bold;
+          /* font-weight:bold; */
           font-size:14px;
           text-align: center;
           text-decoration:none;
@@ -279,7 +286,7 @@ export default {
         .super-little-button a{
           color: #6c3282;
           font-family: 'Press Start 2P', sans-serif;
-          //font-weight:bold;
+          /* font-weight:bold; */
           font-size:10px;
           text-align: center;
           text-decoration:none;
@@ -365,6 +372,43 @@ export default {
             }
 
         }
+
+        .enemy_animation-placeholder {
+            width: 100px; /* Размеры контейнера анимации */
+            height: 100px;
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
+            background-size: cover;
+            background-position: center;
+            animation: loop-animation 1.2s steps(6) infinite; /* Анимация */
+          }
+
+          /* Определяем анимацию */
+          @keyframes loop-animation {
+            0% {
+              background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
+            }
+            16% {
+              background-image: url('assets/Adventurer/adventurer-idle-01.svg'); /* Кадр 2 */
+            }
+            33% {
+              background-image: url('assets/Adventurer/adventurer-idle-02.svg'); /* Кадр 3 */
+            }
+            50% {
+              background-image: url('assets/Adventurer/adventurer-idle-03.svg'); /* Возврат к кадру 1 */
+            }
+              66%{
+                   background-image: url('assets/Adventurer/adventurer-idle-02.svg'); /* Кадр 3 */
+              }
+              83% {
+              background-image: url('assets/Adventurer/adventurer-idle-01.svg'); /* Кадр 2 */
+            }
+              100%{
+                  background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
+              }
+
+          }
 
         .input-container {
             top: 10px;
