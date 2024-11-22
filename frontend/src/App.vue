@@ -1,4 +1,7 @@
 <template>
+  <RegistrationModal :userLoggedIn="userLoggedIn"
+      v-if="!userLoggedIn"  @login="handleLogin"/>
+
   <div class="clicker-section">
 <div class="balance"><div class="little-button"><a>Balance: $ {{balance}}</a></div></div>
 <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade"><div class="little-button" id="open-upgrade"><a>Upgrade</a></div></div>
@@ -46,11 +49,13 @@
 
 
 <script>
+import RegistrationModal from "@/components/RegistrationModal.vue";
 export default {
   data() {
     return{
       balance: 0,
       bet: 0,
+      userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       enemies:[
@@ -87,13 +92,21 @@ export default {
       this.isUpgradeModalVisible = false;
     },
     makeBet(){
-      if(this.bet > 0){
+      if(this.bet > 0 && this.bet <= this.balance){
         this.balance -= this.bet;
-      this.bet = 0;
+        this.bet = 0;
+      }
+      else if(this.bet > this.balance){
+        this.bet = this.balance;
       }
     },
-  }
-
+    handleLogin(value) {
+      this.userLoggedIn = value;
+    },
+  },
+  components: {
+    RegistrationModal
+  },
 }
 
 </script>
