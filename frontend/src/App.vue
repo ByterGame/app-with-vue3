@@ -1,9 +1,9 @@
 <template>
   <RegistrationModal :userLoggedIn="userLoggedIn"
       v-if="!userLoggedIn"  @login="handleLogin"/>
-
+<div v-if="!userLoggedIn" class="overlay"></div>
   <div class="clicker-section">
-<div class="balance"><div class="little-button"><a>Balance: $ {{balance}}</a></div></div>
+<p class="balance">Balance: $ {{balance}}</p>
 <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade"><div class="little-button" id="open-upgrade"><a>Upgrade</a></div></div>
 <div class="container">
     <div class="button" @click="addMoney"><a>Click Me!</a></div>
@@ -13,37 +13,33 @@
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy"><a>Choose Enemy</a></div>
         <div class="bet-row">
-            <span>Win Rate: 75%</span>
+            <span>Win Rate: {{(winRate * 100).toFixed(0)}}%</span>
             <input type="number" v-model="bet" min="0" v-bind:max="balance">
+          <span>Win Odds: {{(3-winRate*1.95).toFixed(1)}}</span>
         </div>
         <div class="little-button" @click="makeBet"><a>Start Fight</a></div>
     </div>
-    <div class="animation-placeholder">
-    </div>
+    <div class="protagonist-animation-placeholder"></div>
 </div>
 
-<!-- Enemy Modal -->
 <div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal">
     <h2>Choose Your Enemy</h2>
     <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
-        <p>
-            Enemy {{enemy.name}} - Speed: {{enemy.speed}}, Strength: {{enemy.strength}}, Durability: {{enemy.durability}}
-        </p>
+        <p>Enemy {{enemy.name}} - Speed: {{enemy.speed}}, Strength: {{enemy.strength}}, Durability: {{enemy.durability}}</p>
         <div class="super-little-button"><a>Select</a></div>
         <div class="enemy_animation-placeholder"></div>
     </div>
 </div>
 
-<!-- Upgrade Modal -->
 <div v-if="isUpgradeModalVisible" class="modal" id="upgrade-modal">
     <h2>Upgrade Your Character</h2>
     <div class="modal-content">
-        <p>Speed: {{character.speed}} </p><div class="super-little-button"><a>Upgrade</a></div>
-        <p>Strength: {{character.strength}} </p><div class="super-little-button"><a>Upgrade</a></div>
-        <p>Durability: {{character.durability}} </p><div class="super-little-button"><a>Upgrade</a></div>
+        <div class="column">
+          <p>Speed: {{character.speed}} </p><div class="super-little-button" @click="upgrade('speed')"><div class="row"><a>Upgrade</a><p>{{character.speed * 50}}$</p></div></div></div>
+        <p>Strength: {{character.strength}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('strength')">Upgrade</a><p>{{character.strength * 50}}$</p></div></div>
+        <p>Durability: {{character.durability}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('durability')">Upgrade</a><p>{{character.durability * 50}}$</p></div></div>
     </div>
 </div>
-
 <div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
 </template>
 
@@ -53,18 +49,20 @@ import RegistrationModal from "@/components/RegistrationModal.vue";
 export default {
   data() {
     return{
-      balance: 0,
+      balance: 200,
       bet: 0,
-      userLoggedIn: false,
+      userLoggedIn: true,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
+      chosenEnemyId: 1,
+      winRate: 0,
       enemies:[
         {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7},
         {id: 2, name: 'Dead', speed: 7, strength: 5, durability: 5},
         {id: 3, name: 'Flying eye', speed: 4, strength: 9, durability: 6}
       ],
       character:{
-          speed: 1,
+          speed: 2,
           strength: 1,
           durability: 1,
         }
@@ -81,16 +79,20 @@ export default {
     addMoney(){
       this.balance++;
     },
+
     openEnemyModal() {
       this.isEnemyModalVisible = true;
     },
+
     openUpgradeModal() {
       this.isUpgradeModalVisible = true;
     },
+
     closeModals() {
       this.isEnemyModalVisible = false;
       this.isUpgradeModalVisible = false;
     },
+
     makeBet(){
       if(this.bet > 0 && this.bet <= this.balance){
         this.balance -= this.bet;
@@ -100,9 +102,38 @@ export default {
         this.bet = this.balance;
       }
     },
+
     handleLogin(value) {
       this.userLoggedIn = value;
     },
+
+    upgrade(characteristic){
+      const sum = this.character[characteristic] * 50;
+      if(this.balance >= sum){
+        this.balance -= sum;
+        this.character[characteristic] ++;
+      }
+      this.calculateWinRate();
+    },
+
+    calculateWinRate() {
+    const enemy = this.enemies.find(e => e.id === this.chosenEnemyId);
+
+    if (!enemy) return 0;
+    let score = 0;
+
+    score += Math.max(this.character.speed - enemy.speed * 0.3, 0.1);
+    score += Math.max(this.character.strength - enemy.strength * 0.5, 0.1);
+    score += Math.max(this.character.durability - enemy.durability * 0.2, 0.1);
+    const maxScore = (this.character.speed + this.character.strength + this.character.durability);
+
+    this.winRate = Math.min((score / maxScore), 0.6);
+  },
+
+  changeEnemy(id) {
+    this.chosenEnemyId = id;
+    this.calculateWinRate();
+  },
   },
   components: {
     RegistrationModal
@@ -350,7 +381,7 @@ export default {
           border-radius: 2px;
         }
 
-        .animation-placeholder {
+        .protagonist-animation-placeholder {
           width: 240px; /* Размеры контейнера анимации */
           height: 240px;
           bottom: 50px;
@@ -508,5 +539,18 @@ export default {
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
             z-index: 5;
+        }
+
+        .column{
+          display: flex;
+          flex-direction: column;
+        }
+
+        .row{
+          display: flex;
+          flex-direction: row;
+          gap: 20px;
+          height: 30px;
+          align-items: center;
         }
     </style>
