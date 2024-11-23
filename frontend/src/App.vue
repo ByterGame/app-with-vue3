@@ -24,22 +24,19 @@
 
 <!-- Enemy Modal -->
 <div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal">
-    <h2>Choose Your Enemy</h2>
-    <div v-if="isEnemyModalVisible" class="modal" id="enemy-modal">
       <h2>Choose Your Enemy</h2>
       <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
-          <div class="enemy-container">
-            <div :id="'enemy-' + enemy.id" :class="'animation-placeholder ' + getAnimationClass(enemy.name)" style="width: 150px; height: 150px;"></div>
-            <p class="enemy-text-container">
+          <div class="enemy-container" style= "width: 600px; height: 200px; overflow: hidden;">
+            <div :id="'enemy-' + enemy.id" :class="'animation-placeholder ' + getAnimationClass(enemy.name)" style=" height: 100% "></div>
+            <p class="enemy-text-container" style=" width: 500px ">
               <span class="enemy-text">Enemy: {{ enemy.name }}</span>
               <span class="enemy-text">Speed: {{ enemy.speed }}</span>
               <span class="enemy-text">Strength: {{ enemy.strength }}</span>
               <span class="enemy-text">Durability: {{ enemy.durability }}</span>
           </p>
         </div>
-        <div class="super-little-button" style="margin-left: auto; margin-right: auto"><a>Select</a></div>
+        <div class="super-little-button" style="position: relative; left: 50%; transform: translate(-50%, 0);"><a>Select</a></div>
       </div>
-  </div>
 </div>
 
 <!-- Upgrade Modal -->
@@ -380,7 +377,6 @@ export default {
           width: 240px; /* Размеры контейнера анимации */
           height: 240px;
           bottom: 50px;
-          margin: 10px auto;
           background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
           background-size: cover;
           background-position: center;
@@ -416,8 +412,9 @@ export default {
             bottom: 50px;
             margin: 10px auto;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); /* Первый кадр */
-            background-size: cover;
+            background-size: contain;
             background-position: center;
+            background-repeat: no-repeat;
             animation: goblin-loop-animation 1.5s steps(13) infinite; /* Анимация */
           }
 
@@ -436,13 +433,58 @@ export default {
             91.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin12.svg'); }
             100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
           }
+          .goblin_static-animation {
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); /* Первый кадр */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: goblin_static-loop-animation 1.1s steps(7) infinite; /* Анимация */
+          }
+
+          @keyframes goblin_static-loop-animation {
+            0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
+            16.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin2.svg'); }
+            33.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin3.svg'); }
+            50% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin4.svg'); }
+            66.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin5.svg'); }
+            83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin6.svg'); }
+            100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); } /* Возврат к первому кадру */
+          }
+          .goblin_reverse-animation {
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); /* Первый кадр */
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: goblin_reverse-loop-animation 1.5s steps(13) infinite; /* Анимация */
+          }
+
+          @keyframes goblin_reverse-loop-animation {
+            0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); }
+            8.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse2.svg'); }
+            16.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse3.svg'); }
+            25% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse4.svg'); }
+            33.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse5.svg'); }
+            41.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse6.svg'); }
+            50% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse7.svg'); }
+            58.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse8.svg'); }
+            66.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse9.svg'); }
+            75% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse10.svg'); }
+            83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse11.svg'); }
+            91.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse12.svg'); }
+            100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); }
+          }
 
           .dead-animation {
             bottom: 50px;
             margin: 10px auto;
             background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg'); /* Первый кадр */
-            background-size: cover;
+            background-size: contain;
             background-position: center;
+            background-repeat: no-repeat;
             animation: dead-loop-animation 1.2s steps(9) infinite; /* Анимация */
           }
 
@@ -462,8 +504,9 @@ export default {
             bottom: 50px;
             margin: 10px auto;
             background-image: url('assets/Enemies/Flying eye/eye1.svg'); /* Первый кадр */
-            background-size: cover;
+            background-size: contain;
             background-position: center;
+            background-repeat: no-repeat;
             animation: flying-eye-loop-animation 1.1s steps(7) infinite; /* Анимация */
           }
 
@@ -480,8 +523,9 @@ export default {
             bottom: 50px;
             margin: 10px auto;
             background-image: url('assets/Enemies/Mushroom/mushroom1.svg'); /* Первый кадр */
-            background-size: cover;
+            background-size: contain;
             background-position: center;
+            background-repeat: no-repeat;
             animation: mushroom-loop-animation 0.9s steps(7) infinite; /* Анимация */
           }
 
@@ -503,8 +547,9 @@ export default {
               bottom: 50px;
               margin: 10px auto;
               background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); /* Первый кадр */
-              background-size: cover;
+              background-size: contain;
               background-position: center;
+              background-repeat: no-repeat;
               animation: skeleton-loop-animation 1.8s steps(7) infinite; /* Анимация */
             }
 
