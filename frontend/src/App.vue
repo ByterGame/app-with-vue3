@@ -3,7 +3,7 @@
       v-if="!userLoggedIn"  @login="handleLogin"/>
 <div v-if="!userLoggedIn" class="overlay"></div>
   <div class="clicker-section">
-<p class="balance">Balance: $ {{balance}}</p>
+<p class="balance">Balance: $ {{balance.toFixed(0)}}</p>
 <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade"><div class="little-button" id="open-upgrade"><a>Upgrade</a></div></div>
 <div class="container">
     <div class="button" @click="addMoney"><a>Click Me!</a></div>
@@ -11,16 +11,18 @@
 </div>
 <div class="animation-section">
     <div class="input-container">
-        <div class="little-button" @click="openEnemyModal" id="open-enemy"><a>Choose Enemy</a></div>
+        <div class="little-button" @click="openEnemyModal" id="open-enemy" :class="{'disabled': fightIsOn}"
+  :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Choose Enemy</a></div>
         <div class="bet-row">
             <span>Win Rate: {{(winRate * 100).toFixed(1)}}%</span>
-            <input type="number" v-model="bet" min="0" v-bind:max="balance">
-          <span>Win Odds: {{(winOdd).toFixed(1)}}</span>
+            <input type="number" v-model="bet" min="10" v-bind:max="balance">
+          <span>Win Odds: {{winOdd.toFixed(1)}}</span>
         </div>
-        <div class="little-button" @click="makeBet"><a>Start Fight</a></div>
+        <div class="little-button" @click="makeBet" :class="{'disabled': fightIsOn}"
+  :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Start Fight</a></div>
     </div>
   <div class="fight-row">
-    <div class="animation-placeholder"></div>
+    <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead, 'protagonist-run': protagonistStatus.run, 'protagonist-attack1': protagonistStatus.attack1 }" id="protagonist"></div>
     <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getAnimationClass(chosenEnemyId)"></div>
   </div>
 </div>
@@ -40,7 +42,7 @@
               <span class="enemy-text">Durability: {{ enemy.durability }}</span>
           </p>
         </div>
-        <div class="super-little-button" style="position: relative; left: 50%; transform: translate(-50%, 0);"><a>Select</a></div>
+        <div class="super-little-button" @click="changeEnemy(enemy.id)" style="position: relative; left: 50%; transform: translate(-50%, 0);"><a>Select</a></div>
       </div>
 </div>
 
@@ -63,13 +65,28 @@ export default {
   data() {
     return{
       balance: 10000,
-      bet: 0,
+      bet: 10,
       userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
+      protagonistIsDead: false,
+      fightIsOn: false,
       chosenEnemyId: 1,
       winRate: 0,
       winOdd: 1,
+      protagonistStatus: {
+        dead: false,
+        attack1: false,
+        attack2: false,
+        attack3: false,
+        defence: false,
+        run: false,
+      },
+      enemyStatus:{
+        dead: false,
+        attack: false,
+        defence: false,
+      },
       priceList:{
         speed: 50,
         strength: 75,
@@ -120,13 +137,30 @@ export default {
 
     makeBet(){
       if(this.bet > 0 && this.bet <= this.balance){
+        const winNumber = Math.random();
         this.balance -= this.bet;
-        this.bet = 0;
+        //let winner = "";
+        if(winNumber <= this.winRate){
+          //winner = "You";
+          this.balance += this.bet * this.winOdd;
+        }
+        else{
+          //winner = "Enemy";
+          this.fightIsOn = true;
+          this.protagonistStatus.dead = true;
+          setTimeout(() => {this.protagonistStatus.dead = false;
+            this.fightIsOn = false;}, 1500*2);
+        }
+        this.bet = 10;
+        // winner += " win";
+        // alert(winner);
       }
       else if(this.bet > this.balance){
+        alert("You don`t have enough money :(")
         this.bet = this.balance;
       }
     },
+
     getAnimationClass(enemyId) {
       switch (enemyId) {
         case 1:
@@ -168,15 +202,17 @@ export default {
 
     this.winRate = Math.min(score, 0.8);
     this.calculateWinOdd();
-  },
-    calculateWinOdd(){
-      this.winOdd = Math.max(3-this.winRate*3.95, 1.1);
     },
 
-  changeEnemy(id) {
-    this.chosenEnemyId = id;
-    this.calculateWinRate();
-  },
+    calculateWinOdd(){
+      this.winOdd = Math.max(4-this.winRate*3.95, 1.4);
+    },
+
+    changeEnemy(id) {
+      this.chosenEnemyId = id;
+      this.calculateWinRate();
+    },
+
   },
   components: {
     RegistrationModal
@@ -231,15 +267,14 @@ export default {
             margin-top: 70px;
         }
 
-
-          .button{
-              text-align:center;
-          background-color: transparent;
+        .button{
+            text-align:center;
+            background-color: transparent;
             font-family: 'Press Start 2P', sans-serif;
-          position:relative;
-          display:inline-block;
-          margin:20px;
-              cursor: pointer;
+            position:relative;
+            display:inline-block;
+            margin:20px;
+            cursor: pointer;
         }
 
         .button a{
@@ -296,14 +331,14 @@ export default {
         }
 
 
-                .little-button{
-              text-align:center;
+        .little-button{
+          text-align:center;
           background-color: transparent;
-            font-family: 'Press Start 2P', sans-serif;
+          font-family: 'Press Start 2P', sans-serif;
           position:relative;
           display:inline-block;
           margin:20px;
-              cursor: pointer;
+          cursor: pointer;
         }
 
         .little-button a{
@@ -359,14 +394,24 @@ export default {
           border-radius: 3px;
         }
 
+        .little-button.disabled a{
+          cursor: not-allowed;
+          top:8px;
+          background-color: #4b1363;
+
+          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+          -moz-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+          box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+        }
+
         .super-little-button{
-              text-align:center;
+          text-align:center;
           background-color: transparent;
-            font-family: 'Press Start 2P', sans-serif;
+          font-family: 'Press Start 2P', sans-serif;
           position:relative;
           display:inline-block;
           margin:5px;
-              cursor: pointer;
+          cursor: pointer;
         }
 
         .super-little-button a{
@@ -400,6 +445,15 @@ export default {
         }
 
         .super-little-button a:active{
+          top:8px;
+          background-color:#2F0A3D;
+
+          -webkit-box-shadow:inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+          -moz-box-shadow:inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+          box-shadow:inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+        }
+
+        .dop{
           top:8px;
           background-color:#2F0A3D;
 
@@ -451,6 +505,54 @@ export default {
           100%{background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
         }
 
+        .protagonist-death{
+          animation: protagonist-death-animation 1.5s steps(6) 2;
+        }
+
+        @keyframes protagonist-death-animation {
+          0% {background-image: url('assets/Adventurer/adventurer-die-00.svg'); }
+          16% {background-image: url('assets/Adventurer/adventurer-die-01.svg'); }
+          33% {background-image: url('assets/Adventurer/adventurer-die-02.svg');}
+          50% {background-image: url('assets/Adventurer/adventurer-die-03.svg');}
+          66%{background-image: url('assets/Adventurer/adventurer-die-04.svg');}
+          83% {background-image: url('assets/Adventurer/adventurer-die-05.svg');}
+          100%{background-image: url('assets/Adventurer/adventurer-die-06.svg');}
+        }
+
+        .protagonist-run{
+          animation: protagonist-run-animation 0.7s steps(11) 1;
+          transform: translate(40px,0);
+        }
+
+        @keyframes protagonist-run-animation {
+          0% {background-image: url('assets/Adventurer/adventurer-run-00.svg'); }
+          16% {background-image: url('assets/Adventurer/adventurer-run-01.svg'); }
+          33% {background-image: url('assets/Adventurer/adventurer-run-02.svg');}
+          50% {background-image: url('assets/Adventurer/adventurer-run-03.svg');}
+          66%{background-image: url('assets/Adventurer/adventurer-run-04.svg');}
+          83% {background-image: url('assets/Adventurer/adventurer-run-05.svg');}
+          100%{background-image: url('assets/Adventurer/adventurer-run-00.svg');}
+        }
+
+        .protagonist-attack1{
+          animation: protagonist-attack1-animation 2.5s steps(11) 1;
+        }
+
+        @keyframes protagonist-attack1-animation {
+          0% {background-image: url('assets/Adventurer/adventurer-attack1-00.svg'); }
+          9% {background-image: url('assets/Adventurer/adventurer-attack1-01.svg'); }
+          18% {background-image: url('assets/Adventurer/adventurer-attack1-02.svg');}
+          27% {background-image: url('assets/Adventurer/adventurer-attack1-03.svg');}
+          36%{background-image: url('assets/Adventurer/adventurer-attack1-04.svg');}
+          45% {background-image: url('assets/Adventurer/adventurer-attack2-00.svg');}
+          54%{background-image: url('assets/Adventurer/adventurer-attack2-01.svg');}
+          63% {background-image: url('assets/Adventurer/adventurer-attack2-02.svg');}
+          72%{background-image: url('assets/Adventurer/adventurer-attack2-03.svg');}
+          81% {background-image: url('assets/Adventurer/adventurer-attack2-04.svg');}
+          90% {background-image: url('assets/Adventurer/adventurer-attack2-05.svg');}
+          100% {background-image: url('assets/Adventurer/adventurer-attack1-00.svg'); }
+        }
+
         .goblin-animation {
             bottom: 50px;
             margin: 10px auto;
@@ -494,31 +596,6 @@ export default {
             66.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin5.svg'); }
             83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin6.svg'); }
             100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); } /* Возврат к первому кадру */
-          }
-          .goblin_reverse-animation {
-            bottom: 50px;
-            margin: 10px auto;
-            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); /* Первый кадр */
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: goblin_reverse-loop-animation 1.5s steps(13) infinite; /* Анимация */
-          }
-
-          @keyframes goblin_reverse-loop-animation {
-            0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); }
-            8.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse2.svg'); }
-            16.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse3.svg'); }
-            25% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse4.svg'); }
-            33.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse5.svg'); }
-            41.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse6.svg'); }
-            50% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse7.svg'); }
-            58.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse8.svg'); }
-            66.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse9.svg'); }
-            75% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse10.svg'); }
-            83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse11.svg'); }
-            91.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse12.svg'); }
-            100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); }
           }
 
           .dead-animation {

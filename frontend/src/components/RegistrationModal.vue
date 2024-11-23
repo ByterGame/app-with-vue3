@@ -4,8 +4,8 @@ import {authService} from "@/services/auth";
 export default {
   data() {
     return {
-      isRegistrationModalVisible: true,
-      isLoginModalVisible: false,
+      isRegistrationModalVisible: false,
+      isLoginModalVisible: true,
       username: '',
       password: '',
       password2: '',
