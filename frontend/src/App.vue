@@ -64,7 +64,7 @@ export default {
     return{
       balance: 10000,
       bet: 0,
-      userLoggedIn: true,
+      userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       chosenEnemyId: 1,
