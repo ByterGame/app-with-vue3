@@ -24,14 +24,34 @@ class UserLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Invalid credentials")
         return user
 
-# class UserTokenSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = get_user_model()
-#         fields = ('id', 'username')
-#
-#     def to_representation(self, instance):
-#         token = RefreshToken.for_user(instance)
-#         return {
-#             'refresh': str(token),
-#             'access': str(token.access_token),
-#         }
+
+class UpdateMoney(serializers.ModelSerializer):
+    money = serializers.IntegerField(write_only=True)
+    maximumMoney = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'money', 'maximumMoney']
+
+    def update(self, instance, validated_data):
+        instance.money = validated_data.get('money', instance.money)
+        instance.maximumMoney = validated_data.get('maximumMoney', instance.maximumMoney)
+        instance.save()
+        return instance
+
+
+class UpdateHero(serializers.ModelSerializer):
+    heroStrength = serializers.IntegerField(default=1)
+    heroSpeed = serializers.IntegerField(default=1)
+    heroDurability = serializers.IntegerField(default=1)
+
+    class Meta:
+        model = User
+        fields = ['username', 'heroStrength', 'heroSpeed', 'heroDurability']
+
+    def update(self, instance, validated_data):
+        instance.heroStrength = validated_data.get('heroStrength', instance.heroStrength)
+        instance.heroSpeed = validated_data.get('heroSpeed', instance.heroSpeed)
+        instance.heroDurability = validated_data.get('heroDurability', instance.heroDurability)
+        instance.save()
+        return instance

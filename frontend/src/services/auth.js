@@ -9,4 +9,10 @@ export const authService = {
     login(userData) {
         return axios.post(`${apiUrl}login/`, userData);
     },
+    updateMoney(userData) {
+        return axios.post(`${apiUrl}updateMoney/`, userData)
+    },
+    updateHero(userData) {
+        return axios.post(`${apiUrl}updateHero/`, userData)
+    },
 };
