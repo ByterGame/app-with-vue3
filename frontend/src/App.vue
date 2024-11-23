@@ -1,15 +1,17 @@
 <template>
   <RegistrationModal :userLoggedIn="userLoggedIn"
-      v-if="!userLoggedIn"  @login="handleLogin"/>
-<div v-if="!userLoggedIn" class="overlay"></div>
+                     v-if="!userLoggedIn" @login="handleLogin"/>
+  <div v-if="!userLoggedIn" class="overlay"></div>
   <div class="clicker-section">
-<p class="balance">Balance: $ {{balance.toFixed(0)}}</p>
-<div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade"><div class="little-button" id="open-upgrade"><a>Upgrade</a></div></div>
-<div class="container">
-    <div class="button" @click="addMoney"><a>Click Me!</a></div>
-</div>
-</div>
-<div class="animation-section">
+    <p class="balance">Balance: $ {{ balance.toFixed(0) }}</p>
+    <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
+      <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
+    </div>
+    <div class="container">
+      <div class="button" @click="addMoney"><a>Click Me!</a></div>
+    </div>
+  </div>
+  <div class="animation-section">
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy" :class="{'disabled': fightIsOn}"
   :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Choose Enemy</a></div>
@@ -28,8 +30,8 @@
   </div>
 </div>
 
-<div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal"
-     style="width: 600px;
+  <div v-if="isEnemyModalVisible" class="modal" id="enemy-modal"
+       style="width: 600px;
      height: 80%;
      overflow-y: auto;">
     <h2>Choose Your Enemy</h2>
@@ -47,25 +49,41 @@
       </div>
 </div>
 
-<div v-if="isUpgradeModalVisible" class="modal" id="upgrade-modal">
+  <div v-if="isUpgradeModalVisible" class="modal" id="upgrade-modal">
     <h2>Upgrade Your Character</h2>
     <div class="modal-content">
-        <div class="column">
-          <p>Speed: {{character.speed}} </p><div class="super-little-button" @click="upgrade('speed')"><div class="row"><a>Upgrade</a><p>{{character.speed * priceList.speed}}$</p></div></div></div>
-        <p>Strength: {{character.strength}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('strength')">Upgrade</a><p>{{character.strength * priceList.strength}}$</p></div></div>
-        <p>Durability: {{character.durability}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('durability')">Upgrade</a><p>{{character.durability * priceList.durability}}$</p></div></div>
+      <div class="column">
+        <p>Speed: {{ character.speed }} </p>
+        <div class="super-little-button" @click="upgrade('speed')">
+          <div class="row"><a>Upgrade</a>
+            <p>{{ character.speed * priceList.speed }}$</p></div>
+        </div>
+      </div>
+      <p>Strength: {{ character.strength }} </p>
+      <div class="super-little-button">
+        <div class="row"><a @click="upgrade('strength')">Upgrade</a>
+          <p>{{ character.strength * priceList.strength }}$</p></div>
+      </div>
+      <p>Durability: {{ character.durability }} </p>
+      <div class="super-little-button">
+        <div class="row"><a @click="upgrade('durability')">Upgrade</a>
+          <p>{{ character.durability * priceList.durability }}$</p></div>
+      </div>
     </div>
-</div>
-<div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
+  </div>
+  <div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
 </template>
 
 
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
+import {authService} from "@/services/auth";
+
 export default {
   data() {
-    return{
+    return {
       balance: 10000,
+      maximumBalance: 0,
       bet: 10,
       userLoggedIn: false,
       isEnemyModalVisible: false,
@@ -83,17 +101,17 @@ export default {
         defence: false,
         run: false,
       },
-      enemyStatus:{
+      enemyStatus: {
         dead: false,
         attack: false,
         defence: false,
       },
-      priceList:{
+      priceList: {
         speed: 50,
         strength: 75,
         durability: 60,
       },
-      enemies:[
+      enemies: [
         {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7,},
         {id: 2, name: 'Dead', speed: 7, strength: 5, durability: 5},
         {id: 3, name: 'Flying eye', speed: 4, strength: 9, durability: 6},
@@ -101,14 +119,14 @@ export default {
         {id: 5, name: 'Demon', speed: 5, strength: 11, durability: 3},
         {id: 6, name: 'Kobold', speed: 7, strength: 3, durability: 9}
       ],
-      character:{
-          speed: 1,
-          strength: 1,
-          durability: 1,
-        }
+      character: {
+        speed: 1,
+        strength: 1,
+        durability: 1,
       }
-    },
-  mounted(){
+    }
+  },
+  mounted() {
     this.calculateWinRate();
     this.calculateWinOdd();
   },
@@ -116,12 +134,36 @@ export default {
   computed: {
     isModalVisible() {
       return this.isEnemyModalVisible || this.isUpgradeModalVisible;
+    },
+    usernameFromStore() {
+      return this.$store.state.username;
     }
   },
 
   methods: {
-    addMoney(){
+    addMoney() {
       this.balance++;
+      if (this.balance > this.maximumBalance) {
+        this.maximumBalance = this.balance;
+      }
+      if (this.balance % 10 === 0) {
+        this.updateMoney();
+      }
+    },
+
+    async updateMoney() {
+      try {
+        const response = await authService.updateMoney({
+          username: this.usernameFromStore,
+          money: this.balance,
+          maximumMoney: this.maximumBalance,
+        });
+        if (response.status === 200) {
+          console.log('save');
+        }
+      } catch (error) {
+        console.error(error)
+      }
     },
 
     openEnemyModal() {
@@ -138,15 +180,15 @@ export default {
     },
 
     makeBet(){
-      if(this.bet > 0 && this.bet <= this.balance){
+      if (this.bet > 0 && this.bet <= this.balance) {
         const winNumber = Math.random();
         this.balance -= this.bet;
         //let winner = "";
-        if(winNumber <= this.winRate){
+        if (winNumber <= this.winRate) {
           //winner = "You";
           this.balance += this.bet * this.winOdd;
         }
-        else{
+        else {
           //winner = "Enemy";
           this.fightIsOn = true;
           this.protagonistStatus.dead = true;
@@ -181,6 +223,7 @@ export default {
           return '';
       }
     },
+
     getAttackAnimationClass(enemyId) {
       switch (enemyId) {
         case 1:
@@ -199,6 +242,7 @@ export default {
           return '';
       }
     },
+
     getStaticAnimationClass(enemyId) {
       switch (enemyId) {
         case 1:
@@ -215,6 +259,7 @@ export default {
           return '';
       }
     },
+
     getReverseStaticAnimationClass(enemyId) {
       switch (enemyId) {
         case 1:
@@ -237,38 +282,50 @@ export default {
       this.userLoggedIn = value;
     },
 
-    upgrade(characteristic){
+    async upgrade(characteristic) {
       const sum = this.character[characteristic] * this.priceList[characteristic];
-      if(this.balance >= sum){
+      if (this.balance >= sum) {
         this.balance -= sum;
-        this.character[characteristic] ++;
+        this.character[characteristic]++;
       }
       this.calculateWinRate();
+      try {
+        const response = await authService.updateHero({
+          username: this.usernameFromStore,
+          heroStrength: this.character["strength"],
+          heroSpeed: this.character["speed"],
+          heroDurability: this.character["durability"],
+        });
+        if (response.status === 200) {
+          console.log('save');
+        }
+      } catch (error) {
+        console.error(error)
+      }
     },
 
     calculateWinRate() {
-    const enemy = this.enemies.find(e => e.id === this.chosenEnemyId);
+      const enemy = this.enemies.find(e => e.id === this.chosenEnemyId);
 
-    if (!enemy) return 0;
-    let score = 0;
+      if (!enemy) return 0;
+      let score = 0;
 
-    const characterSum = this.character.speed * 0.4 + this.character.strength * 0.8 + this.character.durability * 0.5;
-    const enemySum = enemy.speed * 0.4 + enemy.durability * 0.5 + enemy.strength * 0.8;
-    score = 0.5 * (characterSum / enemySum);
+      const characterSum = this.character.speed * 0.4 + this.character.strength * 0.8 + this.character.durability * 0.5;
+      const enemySum = enemy.speed * 0.4 + enemy.durability * 0.5 + enemy.strength * 0.8;
+      score = 0.5 * (characterSum / enemySum);
 
     this.winRate = Math.min(score, 0.8);
     this.calculateWinOdd();
     },
 
-    calculateWinOdd(){
-      this.winOdd = Math.max(4-this.winRate*3.95, 1.4);
+    calculateWinOdd() {
+      this.winOdd = Math.max(4 - this.winRate * 3.95, 1.4);
     },
 
     changeEnemy(id) {
       this.chosenEnemyId = id;
       this.calculateWinRate();
     },
-
   },
   components: {
     RegistrationModal
@@ -278,278 +335,294 @@ export default {
 </script>
 
 <style>
-        body {
-            margin: 0;
-            font-family: 'Press Start 2P', sans-serif;
-            background-image: url("assets/background2.png");
-            background-repeat: repeat-x;
-            background-size: cover;
-            background-position: bottom center;
-            color: #d6c6dd;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
-        }
-        .clicker-section{
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 40%;
-          align-content: center;
-          justify-content: space-between;
-        }
+body {
+  margin: 0;
+  font-family: 'Press Start 2P', sans-serif;
+  background-image: url("assets/background2.png");
+  background-repeat: repeat-x;
+  background-size: cover;
+  background-position: bottom center;
+  color: #d6c6dd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
 
-        .balance {
-            text-align: center;
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
+.clicker-section {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40%;
+  align-content: center;
+  justify-content: space-between;
+}
 
-        .upgrade-button {
-            text-align: center;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
+.balance {
+  text-align: center;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
 
-        .container {
-            text-align: center;
-            width: 100%;
-            margin-top: 70px;
-        }
+.upgrade-button {
+  text-align: center;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
 
-        .button{
-            text-align:center;
-            background-color: transparent;
-            font-family: 'Press Start 2P', sans-serif;
-            position:relative;
-            display:inline-block;
-            margin:20px;
-            cursor: pointer;
-        }
-
-        .button a{
-          color: #d6c6dd;
-          font-family: 'Press Start 2P', sans-serif;
-          /*font-weight:bold;*/
-          font-size:24px;
-          text-align: center;
-          text-decoration:none;
-          background-color:#6c3282;
-          display:block;
-          position:relative;
-          padding:25px 30px;
-
-          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-          text-shadow: 0px 1px 0px #000;
-          filter: dropshadow(color=#000, offx=0px, offy=1px);
-
-          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, 0 10px 0 #601e7c;
-          -moz-box-shadow:inset 0 1px 0 #d6c6dd, 0 10px 0 #601e7c;
-          box-shadow:inset 0 1px 0 #d6c6dd, 0 10px 0 #2F0A3D;
-
-          -webkit-border-radius: 5px;
-          -moz-border-radius: 5px;
-          border-radius: 5px;
-        }
-
-        .button a:hover{
-            background-color: #601e7c;
-        }
-
-        .button a:active{
-          top:10px;
-          background-color:#601e7c;
-
-          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-          -moz-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-          box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-        }
-
-        .button:after{
-          content:"";
-          height:100%;
-          width:100%;
-          padding:4px;
-          position: absolute;
-          bottom:-15px;
-          left:-4px;
-          z-index:-1;
-          background-color:#2F0A3D;
-          -webkit-border-radius: 5px;
-          -moz-border-radius: 5px;
-          border-radius: 5px;
-        }
+.container {
+  text-align: center;
+  width: 100%;
+  margin-top: 70px;
+}
 
 
-        .little-button{
-          text-align:center;
-          background-color: transparent;
-          font-family: 'Press Start 2P', sans-serif;
-          position:relative;
-          display:inline-block;
-          margin:20px;
-          cursor: pointer;
-        }
+.button {
+  text-align: center;
+  background-color: transparent;
+  font-family: 'Press Start 2P', sans-serif;
+  position: relative;
+  display: inline-block;
+  margin: 20px;
+  cursor: pointer;
+}
 
-        .little-button a{
-          color: #d6c6dd;
-          font-family: 'Press Start 2P', sans-serif;
-          /* font-weight:bold; */
-          font-size:14px;
-          text-align: center;
-          text-decoration:none;
-          background-color:#6c3282;
-          display:block;
-            position:relative;
-          padding:10px 15px;
+.button a {
+  color: #d6c6dd;
+  font-family: 'Press Start 2P', sans-serif;
+  /*font-weight:bold;*/
+  font-size: 24px;
+  text-align: center;
+  text-decoration: none;
+  background-color: #6c3282;
+  display: block;
+  position: relative;
+  padding: 25px 30px;
 
-          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-          text-shadow: 0px 1px 0px #000;
-          filter: dropshadow(color=#000, offx=0px, offy=1px);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 1px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
 
-          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, 0 5px 0 #601e7c;
-          -moz-box-shadow:inset 0 1px 0 #d6c6dd, 0 5px 0 #601e7c;
-          box-shadow:inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, 0 10px 0 #601e7c;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, 0 10px 0 #601e7c;
+  box-shadow: inset 0 1px 0 #d6c6dd, 0 10px 0 #2F0A3D;
 
-          -webkit-border-radius: 3px;
-          -moz-border-radius: 3px;
-          border-radius: 3px;
-        }
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
 
-        .little-button a:hover{
-            background-color: #601e7c;
-        }
+.button a:hover {
+  background-color: #601e7c;
+}
 
-        .little-button a:active{
-          top:8px;
-          background-color:#601e7c;
+.button a:active {
+  top: 10px;
+  background-color: #601e7c;
 
-          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-          -moz-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-          box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-        }
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+  box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+}
 
-        .little-button:after{
-          content:"";
-          height:100%;
-          width:100%;
-          padding:4px;
-          position: absolute;
-          bottom:-10px;
-          left:-4px;
-          z-index:-1;
-          background-color:#2F0A3D;
-          -webkit-border-radius: 3px;
-          -moz-border-radius: 3px;
-          border-radius: 3px;
-        }
+.button:after {
+  content: "";
+  height: 100%;
+  width: 100%;
+  padding: 4px;
+  position: absolute;
+  bottom: -15px;
+  left: -4px;
+  z-index: -1;
+  background-color: #2F0A3D;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
 
-        .little-button.disabled a{
-          cursor: not-allowed;
-          top:8px;
-          background-color: #4b1363;
 
-          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-          -moz-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-          box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
-        }
+.little-button {
+  text-align: center;
+  background-color: transparent;
+  font-family: 'Press Start 2P', sans-serif;
+  position: relative;
+  display: inline-block;
+  margin: 20px;
+  cursor: pointer;
+}
 
-        .super-little-button{
-          text-align:center;
-          background-color: transparent;
-          font-family: 'Press Start 2P', sans-serif;
-          position:relative;
-          display:inline-block;
-          margin:5px;
-          cursor: pointer;
-        }
+.little-button a {
+  color: #d6c6dd;
+  font-family: 'Press Start 2P', sans-serif;
+  /* font-weight:bold; */
+  font-size: 14px;
+  text-align: center;
+  text-decoration: none;
+  background-color: #6c3282;
+  display: block;
+  position: relative;
+  padding: 10px 15px;
 
-        .super-little-button a{
-          color: #6c3282;
-          font-family: 'Press Start 2P', sans-serif;
-          /* font-weight:bold; */
-          font-size:10px;
-          text-align: center;
-          text-decoration:none;
-          background-color:#d6c6dd;
-          display:block;
-          position:relative;
-          padding: 10px 12px;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 1px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
 
-          -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-          text-shadow: 0px 0px 0px #000;
-          filter: dropshadow(color=#000, offx=0px, offy=1px);
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #601e7c;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #601e7c;
+  box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
 
-          -webkit-box-shadow:inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
-          -moz-box-shadow:inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
-          box-shadow:inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
 
-          -webkit-border-radius: 3px;
-          -moz-border-radius: 3px;
-          border-radius: 3px;
-        }
+.little-button a:hover {
+  background-color: #601e7c;
+}
 
-        .super-little-button a:hover{
-            background-color: #601e7c;
-            color: #d6c6dd;
-        }
+.little-button a:active {
+  top: 8px;
+  background-color: #601e7c;
 
-        .super-little-button a:active{
-          top:8px;
-          background-color:#2F0A3D;
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+  box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+}
 
-          -webkit-box-shadow:inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
-          -moz-box-shadow:inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
-          box-shadow:inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
-        }
+.little-button:after {
+  content: "";
+  height: 100%;
+  width: 100%;
+  padding: 4px;
+  position: absolute;
+  bottom: -10px;
+  left: -4px;
+  z-index: -1;
+  background-color: #2F0A3D;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
 
-        .super-little-button:after{
-          content:"";
-          height:100%;
-          width:100%;
-          padding:2px;
-          position: absolute;
-          bottom:-5px;
-          left:-2px;
-          z-index:-1;
-          background-color:#2F0A3D;
-          -webkit-border-radius: 2px;
-          -moz-border-radius: 2px;
-          border-radius: 2px;
-        }
+.little-button.disabled a{
+  cursor: not-allowed;
+  top:8px;
+  background-color: #4b1363;
+  -webkit-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+  -moz-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+  box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
+}
 
-        .fight-row{
-          display: flex;
-          flex-direction: row;
-          gap: 20px;
-          align-items: center;
-          justify-content: center;
-        }
 
-        .animation-placeholder {
-          bottom: 50px;
-          background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
-          background-size: contain;
-          background-position: center;
-          background-repeat: no-repeat;
-          animation: loop-animation 1.2s steps(6) infinite;
-        }
+.super-little-button {
+  text-align: center;
+  background-color: transparent;
+  font-family: 'Press Start 2P', sans-serif;
+  position: relative;
+  display: inline-block;
+  margin: 5px;
+  cursor: pointer;
+}
 
-        @keyframes loop-animation {
-          0% {background-image: url('assets/Adventurer/adventurer-idle-00.svg'); }
-          16% {background-image: url('assets/Adventurer/adventurer-idle-01.svg'); }
-          33% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
-          50% {background-image: url('assets/Adventurer/adventurer-idle-03.svg');}
-          66%{background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
-          83% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
-          100%{background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
-        }
+.super-little-button a {
+  color: #6c3282;
+  font-family: 'Press Start 2P', sans-serif;
+  /* font-weight:bold; */
+  font-size: 10px;
+  text-align: center;
+  text-decoration: none;
+  background-color: #d6c6dd;
+  display: block;
+  position: relative;
+  padding: 10px 12px;
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 0px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
+
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+  box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+.super-little-button a:hover {
+  background-color: #601e7c;
+  color: #d6c6dd;
+}
+
+.super-little-button a:active {
+  top: 8px;
+  background-color: #2F0A3D;
+
+  -webkit-box-shadow: inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+  -moz-box-shadow: inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+  box-shadow: inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+}
+
+.super-little-button:after {
+  content: "";
+  height: 100%;
+  width: 100%;
+  padding: 2px;
+  position: absolute;
+  bottom: -5px;
+  left: -2px;
+  z-index: -1;
+  background-color: #2F0A3D;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+
+.fight-row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+
+.animation-placeholder {
+  bottom: 50px;
+  background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: loop-animation 1.2s steps(6) infinite;
+}
+
+@keyframes loop-animation {
+  0% {
+    background-image: url('assets/Adventurer/adventurer-idle-00.svg');
+  }
+  16% {
+    background-image: url('assets/Adventurer/adventurer-idle-01.svg');
+  }
+  33% {
+    background-image: url('assets/Adventurer/adventurer-idle-02.svg');
+  }
+  50% {
+    background-image: url('assets/Adventurer/adventurer-idle-03.svg');
+  }
+  66% {
+    background-image: url('assets/Adventurer/adventurer-idle-02.svg');
+  }
+  83% {
+    background-image: url('assets/Adventurer/adventurer-idle-01.svg');
+  }
+  100% {
+    background-image: url('assets/Adventurer/adventurer-idle-00.svg');
+  }
+}
 
         .protagonist-death{
           animation: protagonist-death-animation 1.5s steps(6) 2;
@@ -1025,115 +1098,117 @@ export default {
             100% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb17.svg'); }
           }
 
-        .input-container {
-            top: 10px;
-            margin: 30px auto;
-            text-align: center;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            width: 90%;
-            align-items: center;
-            color: #d6c6dd;
-        }
+.input-container {
+  top: 10px;
+  margin: 30px auto;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 90%;
+  align-items: center;
+  color: #d6c6dd;
+}
 
-        .input-container span {
-            display: block;
-            margin-bottom: 10px;
+.input-container span {
+  display: block;
+  margin-bottom: 10px;
 
-        }
+}
 
-        .input-container input {
-            width: 120px;
-            padding: 15px;
-            border: 2px solid #d6c6dd;
-            background: #6c3282;
-            color: #d6c6dd;
-            font-family: 'Press Start 2P', sans-serif;
-            font-size: 14px;
-            text-align: center;
-            -webkit-border-radius: 5px;
-            -moz-border-radius: 5px;
-            border-radius: 5px;
-        }
+.input-container input {
+  width: 120px;
+  padding: 15px;
+  border: 2px solid #d6c6dd;
+  background: #6c3282;
+  color: #d6c6dd;
+  font-family: 'Press Start 2P', sans-serif;
+  font-size: 14px;
+  text-align: center;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
 
-        .bet-row{
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
+.bet-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
 
-        .animation-section {
-            background: transparent;
-            border: 0px solid #e0c3fc;
-            width: 100%;
-            height: 60%;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+.animation-section {
+  background: transparent;
+  border: 0px solid #e0c3fc;
+  width: 100%;
+  height: 60%;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-        .modal {
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          display: block;
-          transform: translate(-50%, -50%);
-          background: #2d013d;
-          opacity: 0.95;
-          padding: 20px;
-          border: 4px solid #e0c3fc;
-          z-index: 10;
-      }
-        .enemy-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-      }
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: block;
+  transform: translate(-50%, -50%);
+  background: #2d013d;
+  opacity: 0.95;
+  padding: 20px;
+  border: 4px solid #e0c3fc;
+  z-index: 10;
+}
 
-        .modal h2 {
-            font-size: 14px;
-            font-family: 'Press Start 2P', sans-serif;
-            text-align: center
-        }
+.enemy-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        .animation-placeholder {
-            margin-left: 45px;
-        }
+.modal h2 {
+  font-size: 14px;
+  font-family: 'Press Start 2P', sans-serif;
+  text-align: center
+}
 
-        .enemy-text {
-            display: block;
-            margin-bottom: 10px;
-            margin-left: 150px;
-        }
-        .enemy-text-container{
-          text-align: left;
-        }
+.animation-placeholder {
+  margin-left: 45px;
+}
 
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            display: block;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 5;
-        }
+.enemy-text {
+  display: block;
+  margin-bottom: 10px;
+  margin-left: 150px;
+}
 
-        .column{
-          display: flex;
-          flex-direction: column;
-        }
+.enemy-text-container {
+  text-align: left;
+}
 
-        .row{
-          display: flex;
-          flex-direction: row;
-          gap: 20px;
-          height: 30px;
-          align-items: center;
-        }
-    </style>
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 5;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  height: 30px;
+  align-items: center;
+}
+</style>

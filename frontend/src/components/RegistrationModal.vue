@@ -17,6 +17,9 @@ export default {
     }
   },
   methods: {
+    sendUsername() {
+      this.$store.dispatch('updateUsername', this.username);
+    },
     openLogin() {
       this.isRegistrationModalVisible = false;
       this.isLoginModalVisible = true;
@@ -33,6 +36,7 @@ export default {
         });
         if (response.status === 202) {
           this.$emit('login', true);
+          this.sendUsername();
           this.username = '';
           this.password = '';
         }
