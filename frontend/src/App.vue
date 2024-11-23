@@ -19,16 +19,20 @@
         </div>
         <div class="little-button" @click="makeBet"><a>Start Fight</a></div>
     </div>
-    <div class="protagonist-animation-placeholder"></div>
+  <div class="fight-row">
+    <div class="animation-placeholder"></div>
+    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getAnimationClass(chosenEnemyId)"></div>
+  </div>
 </div>
 
-<div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal">
+<div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal"
+     style="width: 600px;
+     height: 80%;
+     overflow-y: auto;">
     <h2>Choose Your Enemy</h2>
-    <div v-if="isEnemyModalVisible" class="modal" id="enemy-modal">
-      <h2>Choose Your Enemy</h2>
       <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
           <div class="enemy-container">
-            <div :id="'enemy-' + enemy.id" :class="'animation-placeholder ' + getAnimationClass(enemy.name)" style="width: 150px; height: 150px;"></div>
+            <div :id="'enemy-' + enemy.id" :class="'animation-placeholder ' + getAnimationClass(enemy.id)" style="width: 150px; height: 150px;"></div>
             <p class="enemy-text-container">
               <span class="enemy-text">Enemy: {{ enemy.name }}</span>
               <span class="enemy-text">Speed: {{ enemy.speed }}</span>
@@ -36,10 +40,9 @@
               <span class="enemy-text">Durability: {{ enemy.durability }}</span>
           </p>
         </div>
-        <div class="super-little-button" style="margin-left: auto; margin-right: auto"><a>Select</a></div>
+        <div class="super-little-button" @click="changeEnemy(enemy.id)" style="margin-left: auto; margin-right: auto" ><a>Select</a></div>
       </div>
   </div>
-</div>
 
 <div v-if="isUpgradeModalVisible" class="modal" id="upgrade-modal">
     <h2>Upgrade Your Character</h2>
@@ -59,9 +62,9 @@ import RegistrationModal from "@/components/RegistrationModal.vue";
 export default {
   data() {
     return{
-      balance: 200,
+      balance: 10000,
       bet: 0,
-      userLoggedIn: true,
+      userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       chosenEnemyId: 1,
@@ -70,8 +73,8 @@ export default {
         {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7,},
         {id: 2, name: 'Dead', speed: 7, strength: 5, durability: 5},
         {id: 3, name: 'Flying eye', speed: 4, strength: 9, durability: 6},
-        {id: 2, name: 'Mushroom', speed: 4, strength: 7, durability: 5},
-        {id: 2, name: 'Skeleton', speed: 9, strength: 5, durability: 5}
+        {id: 4, name: 'Mushroom', speed: 4, strength: 7, durability: 5},
+        {id: 5, name: 'Skeleton', speed: 9, strength: 5, durability: 5}
       ],
       character:{
           speed: 2,
@@ -114,17 +117,17 @@ export default {
         this.bet = this.balance;
       }
     },
-    getAnimationClass(enemyName) {
-      switch (enemyName.toLowerCase()) {
-        case 'goblin':
+    getAnimationClass(enemyId) {
+      switch (enemyId) {
+        case 1:
           return 'goblin-animation';
-        case 'flying eye':
+        case 3:
           return 'flying-eye-animation';
-        case 'dead':
+        case 2:
           return 'dead-animation';
-        case 'mushroom':
+        case 4:
           return 'mushroom-animation';
-        case 'skeleton':
+        case 5:
           return 'skeleton-animation';
         default:
           return '';
@@ -149,12 +152,11 @@ export default {
     if (!enemy) return 0;
     let score = 0;
 
-    score += Math.max(this.character.speed - enemy.speed * 0.3, 0.1);
-    score += Math.max(this.character.strength - enemy.strength * 0.5, 0.1);
-    score += Math.max(this.character.durability - enemy.durability * 0.2, 0.1);
-    const maxScore = (this.character.speed + this.character.strength + this.character.durability);
+    score += Math.max((this.character.speed - enemy.speed) * 0.3, 0.01);
+    score += Math.max((this.character.strength - enemy.strength) * 0.5, 0.01);
+    score += Math.max((this.character.durability - enemy.durability) * 0.2, 0.01);
 
-    this.winRate = Math.min((score / maxScore), 0.6);
+    this.winRate = Math.min(score, 0.6);
   },
 
   changeEnemy(id) {
@@ -209,7 +211,6 @@ export default {
             left: 20px;
         }
 
-        /* Центральная секция */
         .container {
             text-align: center;
             width: 100%;
@@ -408,8 +409,16 @@ export default {
           border-radius: 2px;
         }
 
-        .protagonist-animation-placeholder {
-          width: 240px; /* Размеры контейнера анимации */
+        .fight-row{
+          display: flex;
+          flex-direction: row;
+          gap: 20px;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .animation-placeholder {
+          width: 240px;
           height: 240px;
           bottom: 50px;
           margin: 10px auto;
@@ -420,37 +429,22 @@ export default {
         }
 
         @keyframes loop-animation {
-          0% {
-            background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
-          }
-          16% {
-            background-image: url('assets/Adventurer/adventurer-idle-01.svg'); /* Кадр 2 */
-          }
-          33% {
-            background-image: url('assets/Adventurer/adventurer-idle-02.svg'); /* Кадр 3 */
-          }
-          50% {
-            background-image: url('assets/Adventurer/adventurer-idle-03.svg'); /* Возврат к кадру 1 */
-          }
-            66%{
-                 background-image: url('assets/Adventurer/adventurer-idle-02.svg'); /* Кадр 3 */
-            }
-            83% {
-            background-image: url('assets/Adventurer/adventurer-idle-01.svg'); /* Кадр 2 */
-          }
-            100%{
-                background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
-            }
-
+          0% {background-image: url('assets/Adventurer/adventurer-idle-00.svg'); }
+          16% {background-image: url('assets/Adventurer/adventurer-idle-01.svg'); }
+          33% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
+          50% {background-image: url('assets/Adventurer/adventurer-idle-03.svg');}
+          66%{background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
+          83% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
+          100%{background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
         }
 
         .goblin-animation {
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); /* Первый кадр */
+            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
             background-size: cover;
             background-position: center;
-            animation: goblin-loop-animation 1.5s steps(13) infinite; /* Анимация */
+            animation: goblin-loop-animation 1.5s steps(13) infinite;
           }
 
           @keyframes goblin-loop-animation {
@@ -472,10 +466,10 @@ export default {
           .dead-animation {
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg'); /* Первый кадр */
+            background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg');
             background-size: cover;
             background-position: center;
-            animation: dead-loop-animation 1.2s steps(9) infinite; /* Анимация */
+            animation: dead-loop-animation 1.2s steps(9) infinite;
           }
 
           @keyframes dead-loop-animation {
@@ -493,10 +487,10 @@ export default {
           .flying-eye-animation {
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Flying eye/eye1.svg'); /* Первый кадр */
+            background-image: url('assets/Enemies/Flying eye/eye1.svg');
             background-size: cover;
             background-position: center;
-            animation: flying-eye-loop-animation 1.1s steps(7) infinite; /* Анимация */
+            animation: flying-eye-loop-animation 1.1s steps(7) infinite;
           }
 
           @keyframes flying-eye-loop-animation {
@@ -506,15 +500,15 @@ export default {
             50% { background-image: url('assets/Enemies/Flying eye/eye4.svg'); }
             66.67% { background-image: url('assets/Enemies/Flying eye/eye5.svg'); }
             83.33% { background-image: url('assets/Enemies/Flying eye/eye6.svg'); }
-            100% { background-image: url('assets/Enemies/Flying eye/eye1.svg'); } /* Возврат к первому кадру */
+            100% { background-image: url('assets/Enemies/Flying eye/eye1.svg'); }
           }
           .mushroom-animation {
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Mushroom/mushroom1.svg'); /* Первый кадр */
+            background-image: url('assets/Enemies/Mushroom/mushroom1.svg');
             background-size: cover;
             background-position: center;
-            animation: mushroom-loop-animation 0.9s steps(7) infinite; /* Анимация */
+            animation: mushroom-loop-animation 0.9s steps(7) infinite;
           }
 
           @keyframes mushroom-loop-animation {
@@ -534,10 +528,10 @@ export default {
           .skeleton-animation {
               bottom: 50px;
               margin: 10px auto;
-              background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); /* Первый кадр */
+              background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg');
               background-size: cover;
               background-position: center;
-              animation: skeleton-loop-animation 1.8s steps(7) infinite; /* Анимация */
+              animation: skeleton-loop-animation 1.8s steps(7) infinite;
             }
 
           @keyframes skeleton-loop-animation {
@@ -559,15 +553,15 @@ export default {
               83.33% { background-image: url('assets/Enemies/Skeleton/skeleton_new16.svg'); }
               88.89% { background-image: url('assets/Enemies/Skeleton/skeleton_new17.svg'); }
               94.44% { background-image: url('assets/Enemies/Skeleton/skeleton_new18.svg'); }
-              100% { background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); } /* Цикл возвращается к 1-му кадру */
+              100% { background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); }
           }
         .bomb-animation {
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Goblin/bomb_animation/bomb1.svg'); /* Первый кадр */
+            background-image: url('assets/Enemies/Goblin/bomb_animation/bomb1.svg');
             background-size: cover;
             background-position: center;
-            animation: bomb-animation 1.2s steps(17) infinite; /* Анимация */
+            animation: bomb-animation 1.2s steps(17) infinite;
           }
 
           @keyframes bomb-animation {
@@ -652,9 +646,6 @@ export default {
           padding: 20px;
           border: 4px solid #e0c3fc;
           z-index: 10;
-          width: 600px;
-          height: 800px;
-          overflow-y: auto;
       }
         .enemy-container {
           display: flex;
