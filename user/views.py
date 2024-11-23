@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
@@ -67,3 +68,21 @@ def updateHero(request):
             update_user = serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+api_view(['Get'])
+def getData(request):
+    if request.method == 'GET':
+        username = request.GET.get('username', None)
+        try:
+            user = User.objects.get(username=username)
+            responseData = {
+                'money': user.money,
+                'maximumMoney': user.maximumMoney,
+                'heroStrength': user.heroStrength,
+                'heroSpeed': user.heroSpeed,
+                'heroDurability': user.heroDurability,
+            }
+            print(responseData)
+            return JsonResponse(responseData)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)

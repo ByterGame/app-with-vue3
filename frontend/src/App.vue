@@ -109,6 +109,13 @@ export default {
       }
     }
   },
+  watch:{
+    userLoggedIn (oldValue, newValue) {
+      if(newValue === false) {
+        this.getData();
+      }
+    }
+  },
   mounted() {
     this.calculateWinRate();
     this.calculateWinOdd();
@@ -145,7 +152,21 @@ export default {
           console.log('save');
         }
       } catch (error) {
-        console.error(error)
+        console.error(error);
+      }
+    },
+
+    async getData() {
+      try {
+        const response = await authService.getData(this.usernameFromStore);
+        console.log(response);
+        this.balance = response.data['money'];
+        this.maximumBalance = response.data['maximumMoney'];
+        this.character['speed'] = response.data['heroSpeed'];
+        this.character['strength'] = response.data['heroStrength'];
+        this.character['durability'] = response.data['heroDurability'];
+      } catch (error) {
+        console.error(error);
       }
     },
 

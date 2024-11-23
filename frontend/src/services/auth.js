@@ -15,4 +15,7 @@ export const authService = {
     updateHero(userData) {
         return axios.post(`${apiUrl}updateHero/`, userData)
     },
+    getData(username) {
+        return axios.get(`${apiUrl}getData/`, {params : {username : username}})
+    },
 };
