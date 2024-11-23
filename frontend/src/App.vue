@@ -13,9 +13,9 @@
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy"><a>Choose Enemy</a></div>
         <div class="bet-row">
-            <span>Win Rate: {{(winRate * 100).toFixed(0)}}%</span>
+            <span>Win Rate: {{(winRate * 100).toFixed(1)}}%</span>
             <input type="number" v-model="bet" min="0" v-bind:max="balance">
-          <span>Win Odds: {{(3-winRate*1.95).toFixed(1)}}</span>
+          <span>Win Odds: {{(winOdd).toFixed(1)}}</span>
         </div>
         <div class="little-button" @click="makeBet"><a>Start Fight</a></div>
     </div>
@@ -48,9 +48,9 @@
     <h2>Upgrade Your Character</h2>
     <div class="modal-content">
         <div class="column">
-          <p>Speed: {{character.speed}} </p><div class="super-little-button" @click="upgrade('speed')"><div class="row"><a>Upgrade</a><p>{{character.speed * 50}}$</p></div></div></div>
-        <p>Strength: {{character.strength}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('strength')">Upgrade</a><p>{{character.strength * 50}}$</p></div></div>
-        <p>Durability: {{character.durability}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('durability')">Upgrade</a><p>{{character.durability * 50}}$</p></div></div>
+          <p>Speed: {{character.speed}} </p><div class="super-little-button" @click="upgrade('speed')"><div class="row"><a>Upgrade</a><p>{{character.speed * priceList.speed}}$</p></div></div></div>
+        <p>Strength: {{character.strength}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('strength')">Upgrade</a><p>{{character.strength * priceList.strength}}$</p></div></div>
+        <p>Durability: {{character.durability}} </p><div class="super-little-button"><div class="row"><a @click="upgrade('durability')">Upgrade</a><p>{{character.durability * priceList.durability}}$</p></div></div>
     </div>
 </div>
 <div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
@@ -64,11 +64,17 @@ export default {
     return{
       balance: 10000,
       bet: 0,
-      userLoggedIn: false,
+      userLoggedIn: true,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       chosenEnemyId: 1,
       winRate: 0,
+      winOdd: 1,
+      priceList:{
+        speed: 50,
+        strength: 75,
+        durability: 60,
+      },
       enemies:[
         {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7,},
         {id: 2, name: 'Dead', speed: 7, strength: 5, durability: 5},
@@ -83,6 +89,10 @@ export default {
         }
       }
     },
+  mounted(){
+    this.calculateWinRate();
+    this.calculateWinOdd();
+  },
 
   computed: {
     isModalVisible() {
@@ -138,7 +148,7 @@ export default {
     },
 
     upgrade(characteristic){
-      const sum = this.character[characteristic] * 50;
+      const sum = this.character[characteristic] * this.priceList[characteristic];
       if(this.balance >= sum){
         this.balance -= sum;
         this.character[characteristic] ++;
@@ -152,12 +162,16 @@ export default {
     if (!enemy) return 0;
     let score = 0;
 
-    score += Math.max((this.character.speed - enemy.speed) * 0.3, 0.01);
-    score += Math.max((this.character.strength - enemy.strength) * 0.5, 0.01);
-    score += Math.max((this.character.durability - enemy.durability) * 0.2, 0.01);
+    const characterSum = this.character.speed * 0.4 + this.character.strength * 0.8 + this.character.durability * 0.5;
+    const enemySum = enemy.speed * 0.4 + enemy.durability * 0.5 + enemy.strength * 0.8;
+    score = 0.5 * (characterSum / enemySum);
 
-    this.winRate = Math.min(score, 0.6);
+    this.winRate = Math.min(score, 0.8);
+    this.calculateWinOdd();
   },
+    calculateWinOdd(){
+      this.winOdd = Math.max(3-this.winRate*3.95, 1.1);
+    },
 
   changeEnemy(id) {
     this.chosenEnemyId = id;
