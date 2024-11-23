@@ -25,13 +25,21 @@
 <!-- Enemy Modal -->
 <div v-if="isEnemyModalVisible"  class="modal" id="enemy-modal">
     <h2>Choose Your Enemy</h2>
-    <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
-        <p>
-            Enemy {{enemy.name}} - Speed: {{enemy.speed}}, Strength: {{enemy.strength}}, Durability: {{enemy.durability}}
-        </p>
-        <div class="super-little-button"><a>Select</a></div>
-        <div class="enemy_animation-placeholder"></div>
-    </div>
+    <div v-if="isEnemyModalVisible" class="modal" id="enemy-modal">
+      <h2>Choose Your Enemy</h2>
+      <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
+          <div class="enemy-container">
+            <div :id="'enemy-' + enemy.id" :class="'animation-placeholder ' + getAnimationClass(enemy.name)" style="width: 150px; height: 150px;"></div>
+            <p class="enemy-text-container">
+              <span class="enemy-text">Enemy: {{ enemy.name }}</span>
+              <span class="enemy-text">Speed: {{ enemy.speed }}</span>
+              <span class="enemy-text">Strength: {{ enemy.strength }}</span>
+              <span class="enemy-text">Durability: {{ enemy.durability }}</span>
+          </p>
+        </div>
+        <div class="super-little-button" style="margin-left: auto; margin-right: auto"><a>Select</a></div>
+      </div>
+  </div>
 </div>
 
 <!-- Upgrade Modal -->
@@ -59,9 +67,11 @@ export default {
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       enemies:[
-        {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7},
+        {id: 1, name: 'Goblin', speed: 3, strength: 8, durability: 7,},
         {id: 2, name: 'Dead', speed: 7, strength: 5, durability: 5},
-        {id: 3, name: 'Flying eye', speed: 4, strength: 9, durability: 6}
+        {id: 3, name: 'Flying eye', speed: 4, strength: 9, durability: 6},
+        {id: 2, name: 'Mushroom', speed: 4, strength: 7, durability: 5},
+        {id: 2, name: 'Skeleton', speed: 9, strength: 5, durability: 5}
       ],
       character:{
           speed: 1,
@@ -98,6 +108,22 @@ export default {
       }
       else if(this.bet > this.balance){
         this.bet = this.balance;
+      }
+    },
+    getAnimationClass(enemyName) {
+      switch (enemyName.toLowerCase()) {
+        case 'goblin':
+          return 'goblin-animation';
+        case 'flying eye':
+          return 'flying-eye-animation';
+        case 'dead':
+          return 'dead-animation';
+        case 'mushroom':
+          return 'mushroom-animation';
+        case 'skeleton':
+          return 'skeleton-animation';
+        default:
+          return '';
       }
     },
     handleLogin(value) {
@@ -386,41 +412,150 @@ export default {
 
         }
 
-        .enemy_animation-placeholder {
-            width: 100px; /* Размеры контейнера анимации */
-            height: 100px;
+        .goblin-animation {
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
+            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); /* Первый кадр */
             background-size: cover;
             background-position: center;
-            animation: loop-animation 1.2s steps(6) infinite; /* Анимация */
+            animation: goblin-loop-animation 1.5s steps(13) infinite; /* Анимация */
           }
 
-          /* Определяем анимацию */
-          @keyframes loop-animation {
-            0% {
-              background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
-            }
-            16% {
-              background-image: url('assets/Adventurer/adventurer-idle-01.svg'); /* Кадр 2 */
-            }
-            33% {
-              background-image: url('assets/Adventurer/adventurer-idle-02.svg'); /* Кадр 3 */
-            }
-            50% {
-              background-image: url('assets/Adventurer/adventurer-idle-03.svg'); /* Возврат к кадру 1 */
-            }
-              66%{
-                   background-image: url('assets/Adventurer/adventurer-idle-02.svg'); /* Кадр 3 */
-              }
-              83% {
-              background-image: url('assets/Adventurer/adventurer-idle-01.svg'); /* Кадр 2 */
-            }
-              100%{
-                  background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Кадр 1 */
-              }
+          @keyframes goblin-loop-animation {
+            0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
+            8.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin2.svg'); }
+            16.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin3.svg'); }
+            25% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin4.svg'); }
+            33.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin5.svg'); }
+            41.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin6.svg'); }
+            50% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin7.svg'); }
+            58.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin8.svg'); }
+            66.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin9.svg'); }
+            75% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin10.svg'); }
+            83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin11.svg'); }
+            91.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin12.svg'); }
+            100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
+          }
 
+          .dead-animation {
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg'); /* Первый кадр */
+            background-size: cover;
+            background-position: center;
+            animation: dead-loop-animation 1.2s steps(9) infinite; /* Анимация */
+          }
+
+          @keyframes dead-loop-animation {
+            0% { background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg'); }
+            12.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead2.svg'); }
+            25% { background-image: url('assets/Enemies/Dead/dead_animation/dead3.svg'); }
+            37.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead4.svg'); }
+            50% { background-image: url('assets/Enemies/Dead/dead_animation/dead5.svg'); }
+            62.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead6.svg'); }
+            75% { background-image: url('assets/Enemies/Dead/dead_animation/dead7.svg'); }
+            87.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead8.svg'); }
+            100% { background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg'); }
+          }
+
+          .flying-eye-animation {
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Enemies/Flying eye/eye1.svg'); /* Первый кадр */
+            background-size: cover;
+            background-position: center;
+            animation: flying-eye-loop-animation 1.1s steps(7) infinite; /* Анимация */
+          }
+
+          @keyframes flying-eye-loop-animation {
+            0% { background-image: url('assets/Enemies/Flying eye/eye1.svg'); }
+            16.67% { background-image: url('assets/Enemies/Flying eye/eye2.svg'); }
+            33.33% { background-image: url('assets/Enemies/Flying eye/eye3.svg'); }
+            50% { background-image: url('assets/Enemies/Flying eye/eye4.svg'); }
+            66.67% { background-image: url('assets/Enemies/Flying eye/eye5.svg'); }
+            83.33% { background-image: url('assets/Enemies/Flying eye/eye6.svg'); }
+            100% { background-image: url('assets/Enemies/Flying eye/eye1.svg'); } /* Возврат к первому кадру */
+          }
+          .mushroom-animation {
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Enemies/Mushroom/mushroom1.svg'); /* Первый кадр */
+            background-size: cover;
+            background-position: center;
+            animation: mushroom-loop-animation 0.9s steps(7) infinite; /* Анимация */
+          }
+
+          @keyframes mushroom-loop-animation {
+            0% { background-image: url('assets/Enemies/Mushroom/mushroom1.svg'); }
+            9.09% { background-image: url('assets/Enemies/Mushroom/mushroom2.svg'); }
+            18.18% { background-image: url('assets/Enemies/Mushroom/mushroom3.svg'); }
+            27.27% { background-image: url('assets/Enemies/Mushroom/mushroom4.svg'); }
+            36.36% { background-image: url('assets/Enemies/Mushroom/mushroom5.svg'); }
+            45.45% { background-image: url('assets/Enemies/Mushroom/mushroom6.svg'); }
+            54.54% { background-image: url('assets/Enemies/Mushroom/mushroom7.svg'); }
+            63.63% { background-image: url('assets/Enemies/Mushroom/mushroom8.svg'); }
+            72.72% { background-image: url('assets/Enemies/Mushroom/mushroom9.svg'); }
+            81.81% { background-image: url('assets/Enemies/Mushroom/mushroom10.svg'); }
+            90% { background-image: url('assets/Enemies/Mushroom/mushroom11.svg'); }
+            100% { background-image: url('assets/Enemies/Mushroom/mushroom1.svg'); }
+        }
+          .skeleton-animation {
+              bottom: 50px;
+              margin: 10px auto;
+              background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); /* Первый кадр */
+              background-size: cover;
+              background-position: center;
+              animation: skeleton-loop-animation 1.8s steps(7) infinite; /* Анимация */
+            }
+
+          @keyframes skeleton-loop-animation {
+              0% { background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); }
+              5.56% { background-image: url('assets/Enemies/Skeleton/skeleton_new2.svg'); }
+              11.11% { background-image: url('assets/Enemies/Skeleton/skeleton_new3.svg'); }
+              16.67% { background-image: url('assets/Enemies/Skeleton/skeleton_new4.svg'); }
+              22.22% { background-image: url('assets/Enemies/Skeleton/skeleton_new5.svg'); }
+              27.78% { background-image: url('assets/Enemies/Skeleton/skeleton_new6.svg'); }
+              33.33% { background-image: url('assets/Enemies/Skeleton/skeleton_new7.svg'); }
+              38.89% { background-image: url('assets/Enemies/Skeleton/skeleton_new8.svg'); }
+              44.44% { background-image: url('assets/Enemies/Skeleton/skeleton_new9.svg'); }
+              50% { background-image: url('assets/Enemies/Skeleton/skeleton_new10.svg'); }
+              55.56% { background-image: url('assets/Enemies/Skeleton/skeleton_new11.svg'); }
+              61.11% { background-image: url('assets/Enemies/Skeleton/skeleton_new12.svg'); }
+              66.67% { background-image: url('assets/Enemies/Skeleton/skeleton_new13.svg'); }
+              72.22% { background-image: url('assets/Enemies/Skeleton/skeleton_new14.svg'); }
+              77.78% { background-image: url('assets/Enemies/Skeleton/skeleton_new15.svg'); }
+              83.33% { background-image: url('assets/Enemies/Skeleton/skeleton_new16.svg'); }
+              88.89% { background-image: url('assets/Enemies/Skeleton/skeleton_new17.svg'); }
+              94.44% { background-image: url('assets/Enemies/Skeleton/skeleton_new18.svg'); }
+              100% { background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); } /* Цикл возвращается к 1-му кадру */
+          }
+        .bomb-animation {
+            bottom: 50px;
+            margin: 10px auto;
+            background-image: url('assets/Enemies/Goblin/bomb_animation/bomb1.svg'); /* Первый кадр */
+            background-size: cover;
+            background-position: center;
+            animation: bomb-animation 1.2s steps(17) infinite; /* Анимация */
+          }
+
+          @keyframes bomb-animation {
+            0% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb1.svg'); }
+            6.25% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb2.svg'); }
+            12.5% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb3.svg'); }
+            18.75% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb4.svg'); }
+            25% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb5.svg'); }
+            31.25% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb6.svg'); }
+            37.5% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb7.svg'); }
+            43.75% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb8.svg'); }
+            50% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb9.svg'); }
+            56.25% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb10.svg'); }
+            62.5% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb11.svg'); }
+            68.75% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb12.svg'); }
+            75% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb13.svg'); }
+            81.25% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb14.svg'); }
+            87.5% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb15.svg'); }
+            93.75% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb16.svg'); }
+            100% { background-image: url('assets/Enemies/Goblin/bomb_animation/bomb17.svg'); }
           }
 
         .input-container {
@@ -475,28 +610,43 @@ export default {
         }
 
         .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            display: block;
-            transform: translate(-50%, -50%);
-            background: #2d013d;
-            opacity: 0.95;
-            padding: 20px;
-            border: 4px solid #e0c3fc;
-            z-index: 10;
-        }
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          display: block;
+          transform: translate(-50%, -50%);
+          background: #2d013d;
+          opacity: 0.95;
+          padding: 20px;
+          border: 4px solid #e0c3fc;
+          z-index: 10;
+          width: 600px;
+          height: 800px;
+          overflow-y: auto;
+      }
+        .enemy-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
 
         .modal h2 {
             font-size: 14px;
             font-family: 'Press Start 2P', sans-serif;
+            text-align: center
         }
 
-        .modal-content {
-            margin-top: 20px;
+        .animation-placeholder {
+            margin-left: 45px;
         }
-        .modal-content button {
-            font-family: 'Press Start 2P', sans-serif;
+
+        .enemy-text {
+            display: block;
+            margin-bottom: 10px;
+            margin-left: 150px;
+        }
+        .enemy-text-container{
+          text-align: left;
         }
 
         .overlay {
