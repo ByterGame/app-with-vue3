@@ -25,7 +25,7 @@
     </div>
   <div class="fight-row">
     <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead, 'protagonist-run': protagonistStatus.run, 'protagonist-attack1': protagonistStatus.attack1 }" style=" width: 300px;  height: 300px; margin-top: 80px; "></div>
-    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getDeathAnimationClass(chosenEnemyId)"
+    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getReverseStaticAnimationClass(chosenEnemyId)"
          style=" margin-top: 80px; "></div>
   </div>
 </div>
