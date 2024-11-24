@@ -138,6 +138,10 @@ export default {
     this.calculateWinOdd();
   },
 
+  updated() {
+    this.updateData();
+  },
+
   computed: {
     isModalVisible() {
       return this.isEnemyModalVisible || this.isUpgradeModalVisible;
@@ -153,17 +157,20 @@ export default {
       if (this.balance > this.maximumBalance) {
         this.maximumBalance = this.balance;
       }
-      if (this.balance % 10 === 0) {
-        this.updateMoney();
-      }
+      // if (this.balance % 10 === 0) {
+      //   this.updateMoney();
+      // }
     },
 
-    async updateMoney() {
+    async updateData() {
       try {
-        const response = await authService.updateMoney({
+        const response = await authService.updateData({
           username: this.usernameFromStore,
           money: this.balance,
           maximumMoney: this.maximumBalance,
+          heroStrength: this.character["strength"],
+          heroSpeed: this.character["speed"],
+          heroDurability: this.character["durability"],
         });
         if (response.status === 200) {
           console.log('save');
@@ -172,6 +179,21 @@ export default {
         console.error(error);
       }
     },
+
+    // async updateMoney() {
+    //   try {
+    //     const response = await authService.updateMoney({
+    //       username: this.usernameFromStore,
+    //       money: this.balance,
+    //       maximumMoney: this.maximumBalance,
+    //     });
+    //     if (response.status === 200) {
+    //       console.log('save');
+    //     }
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // },
 
     async getData() {
       try {
@@ -303,26 +325,26 @@ export default {
       this.userLoggedIn = value;
     },
 
-    async upgrade(characteristic) {
+    upgrade(characteristic) {
       const sum = this.character[characteristic] * this.priceList[characteristic];
       if (this.balance >= sum) {
         this.balance -= sum;
         this.character[characteristic]++;
       }
       this.calculateWinRate();
-      try {
-        const response = await authService.updateHero({
-          username: this.usernameFromStore,
-          heroStrength: this.character["strength"],
-          heroSpeed: this.character["speed"],
-          heroDurability: this.character["durability"],
-        });
-        if (response.status === 200) {
-          console.log('save');
-        }
-      } catch (error) {
-        console.error(error)
-      }
+      // try {
+      //   const response = await authService.updateHero({
+      //     username: this.usernameFromStore,
+      //     heroStrength: this.character["strength"],
+      //     heroSpeed: this.character["speed"],
+      //     heroDurability: this.character["durability"],
+      //   });
+      //   if (response.status === 200) {
+      //     console.log('save');
+      //   }
+      // } catch (error) {
+      //   console.error(error)
+      // }
     },
 
     calculateWinRate() {
