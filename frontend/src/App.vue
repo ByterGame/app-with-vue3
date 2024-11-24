@@ -25,7 +25,7 @@
     </div>
   <div class="fight-row">
     <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead, 'protagonist-run': protagonistStatus.run, 'protagonist-attack1': protagonistStatus.attack1 }" style=" width: 300px;  height: 300px; margin-top: 80px; "></div>
-    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getReverseStaticAnimationClass(chosenEnemyId)"
+    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getReverseStaticAnimationClass(chosenEnemyId) "
          style=" margin-top: 80px; "></div>
   </div>
 </div>
@@ -38,7 +38,7 @@
       <div class="modal-content" v-for="enemy in enemies" :key="enemy.id">
           <div class="enemy-container" style= "width: 600px; height: 200px; overflow: hidden;">
             <div :id="'enemy-' + enemy.id" :class="'animation-placeholder ' + getAnimationClass(enemy.id)" style=" width: 300px;  height: 100%; "></div>
-            <p class="enemy-text-container" style=" width: 500px ">
+            <p class="enemy-text-container" style=" width: 550px ">
               <span class="enemy-text">Enemy: {{ enemy.name }}</span>
               <span class="enemy-text">Speed: {{ enemy.speed }}</span>
               <span class="enemy-text">Strength: {{ enemy.strength }}</span>
@@ -85,7 +85,7 @@ export default {
       balance: 10000,
       maximumBalance: 0,
       bet: 10,
-      userLoggedIn: true,
+      userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       protagonistIsDead: false,
@@ -1103,6 +1103,34 @@ body {
               94.44% { background-image: url('assets/Enemies/Skeleton/skeleton_new18.svg'); }
               100% { background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg'); }
           }
+          .skeleton-walk-animation {
+              width: 250px;
+              height: 250px;
+              bottom: 50px;
+              margin: 10px auto;
+              background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg');
+              background-size: contain;
+              background-position: center;
+              background-repeat: no-repeat;
+              animation: skeleton-walk-loop-animation 1.8s steps(7) 2;
+            }
+
+          @keyframes skeleton-walk-loop-animation {
+            0% { background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg'); }
+            7.69% { background-image: url('assets/Enemies/Skeleton/skeleton-walk2.svg'); }
+            15.38% { background-image: url('assets/Enemies/Skeleton/skeleton-walk3.svg'); }
+            23.08% { background-image: url('assets/Enemies/Skeleton/skeleton-walk4.svg'); }
+            30.77% { background-image: url('assets/Enemies/Skeleton/skeleton-walk5.svg'); }
+            38.46% { background-image: url('assets/Enemies/Skeleton/skeleton-walk6.svg'); }
+            46.15% { background-image: url('assets/Enemies/Skeleton/skeleton-walk7.svg'); }
+            53.85% { background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg'); }
+            61.54% { background-image: url('assets/Enemies/Skeleton/skeleton-walk9.svg'); }
+            69.23% { background-image: url('assets/Enemies/Skeleton/skeleton-walk10.svg'); }
+            76.92% { background-image: url('assets/Enemies/Skeleton/skeleton-walk11.svg'); }
+            84.62% { background-image: url('assets/Enemies/Skeleton/skeleton-walk12.svg'); }
+            92.31% { background-image: url('assets/Enemies/Skeleton/skeleton-walk13.svg'); }
+            100% { background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg'); }
+        }
 
           .skeleton-death-animation {
             width: 300px;
@@ -1206,6 +1234,30 @@ body {
             80% { background-image: url('assets/Enemies/Kobold/kobold-attack5.svg'); }
             100% { background-image: url('assets/Enemies/Kobold/kobold-attack1.svg'); }
         }
+          .kobold-run-animation {
+              width: 230px;
+              height: 230px;
+              bottom: 50px;
+              margin: 10px auto;
+              background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
+              background-size: contain;
+              background-position: center;
+              background-repeat: no-repeat;
+              animation: kobold-run-animation-loop-animation 0.8s steps(7) infinite;
+            }
+
+          @keyframes kobold-run-animation-loop {
+            0% { background-image: url('assets/Enemies/Kobold/kobold-run1.svg'); }
+            11.11% { background-image: url('assets/Enemies/Kobold/kobold-run2.svg'); }
+            22.22% { background-image: url('assets/Enemies/Kobold/kobold-run3.svg'); }
+            33.33% { background-image: url('assets/Enemies/Kobold/kobold-run4.svg'); }
+            44.44% { background-image: url('assets/Enemies/Kobold/kobold-run5.svg'); }
+            55.55% { background-image: url('assets/Enemies/Kobold/kobold-run6.svg'); }
+            66.66% { background-image: url('assets/Enemies/Kobold/kobold-run7.svg'); }
+            77.77% { background-image: url('assets/Enemies/Kobold/kobold-run8.svg'); }
+            100% { background-image: url('assets/Enemies/Kobold/kobold-run1.svg'); }
+        }
+
           .kobold-death-animation {
             width: 300px;
             height: 300px;
