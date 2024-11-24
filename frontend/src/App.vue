@@ -25,7 +25,7 @@
     </div>
   <div class="fight-row">
     <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead, 'protagonist-run': protagonistStatus.run, 'protagonist-attack1': protagonistStatus.attack1 }" style=" width: 300px;  height: 300px; margin-top: 80px; "></div>
-    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getReverseStaticAnimationClass(chosenEnemyId)"
+    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getDeathAnimationClass(chosenEnemyId)"
          style=" margin-top: 80px; "></div>
   </div>
 </div>
@@ -85,7 +85,7 @@ export default {
       balance: 10000,
       maximumBalance: 0,
       bet: 10,
-      userLoggedIn: false,
+      userLoggedIn: true,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       protagonistIsDead: false,
@@ -271,7 +271,7 @@ export default {
         case 1:
           return 'goblin-death-animation';
         case 3:
-          return 'flying-death-eye-animation';
+          return 'flying-eye-death-animation';
         case 2:
           return 'dead-death-animation';
         case 4:
@@ -662,27 +662,13 @@ body {
 }
 
 @keyframes loop-animation {
-  0% {
-    background-image: url('assets/Adventurer/adventurer-idle-00.svg');
-  }
-  16% {
-    background-image: url('assets/Adventurer/adventurer-idle-01.svg');
-  }
-  33% {
-    background-image: url('assets/Adventurer/adventurer-idle-02.svg');
-  }
-  50% {
-    background-image: url('assets/Adventurer/adventurer-idle-03.svg');
-  }
-  66% {
-    background-image: url('assets/Adventurer/adventurer-idle-02.svg');
-  }
-  83% {
-    background-image: url('assets/Adventurer/adventurer-idle-01.svg');
-  }
-  100% {
-    background-image: url('assets/Adventurer/adventurer-idle-00.svg');
-  }
+  0% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
+  16% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
+  33% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
+  50% {background-image: url('assets/Adventurer/adventurer-idle-03.svg');}
+  66% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
+  83% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
+  100% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
 }
 
         .protagonist-death{
@@ -765,14 +751,14 @@ body {
             height: 300px;
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death1.svg');
+            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death8.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             animation: goblin-death-loop-animation 1.2s steps(9) 1;
           }
 
-          @keyframes dead-death-loop-animation {
+          @keyframes goblin-death-loop-animation {
             0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death1.svg'); }
             14% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death2.svg'); }
             28% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death3.svg'); }
@@ -881,7 +867,7 @@ body {
             height: 300px;
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Dead/dead_animation/dead-death1.svg');
+            background-image: url('assets/Enemies/Dead/dead_animation/dead-death12.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -890,18 +876,17 @@ body {
 
           @keyframes dead-death-loop-animation {
             0% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death1.svg'); }
-            8.33% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death2.svg'); }
-            16.67% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death3.svg'); }
-            25% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death4.svg'); }
-            33.33% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death5.svg'); }
-            41.67% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death6.svg'); }
-            50% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death7.svg'); }
-            58.33% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death8.svg'); }
-            66.67% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death9.svg'); }
-            75% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death10.svg'); }
-            83.33% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death11.svg'); }
-            91.67% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death12.svg'); }
-            100% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death1.svg'); }
+            9.09% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death2.svg'); }
+            18.18% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death3.svg'); }
+            27.27% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death4.svg'); }
+            36.36% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death5.svg'); }
+            45.45% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death6.svg'); }
+            54.55% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death7.svg'); }
+            63.64% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death8.svg'); }
+            72.73% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death9.svg'); }
+            81.82% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death10.svg'); }
+            91.91% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death11.svg'); }
+            100% { background-image: url('assets/Enemies/Dead/dead_animation/dead-death12.svg'); }
           }
 
           .dead-reverse-animation {
@@ -979,26 +964,25 @@ body {
             height: 300px;
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Demon/demon-death1.svg');
+            background-image: url('assets/Enemies/Demon/demon-death10.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             animation: demon-death-loop-animation 1.2s steps(9) 1;
           }
 
-          @keyframes demon-death-loop-animation {
-            0% { background-image: url('assets/Enemies/Demon/demon-death1.svg'); }
-            10% { background-image: url('assets/Enemies/Demon/demon-death2.svg'); }
-            20% { background-image: url('assets/Enemies/Demon/demon-death3.svg'); }
-            30% { background-image: url('assets/Enemies/Demon/demon-death4.svg'); }
-            40% { background-image: url('assets/Enemies/Demon/demon-death5.svg'); }
-            50% { background-image: url('assets/Enemies/Demon/demon-death6.svg'); }
-            60% { background-image: url('assets/Enemies/Demon/demon-death7.svg'); }
-            70% { background-image: url('assets/Enemies/Demon/demon-death8.svg'); }
-            80% { background-image: url('assets/Enemies/Demon/demon-death9.svg'); }
-            90% { background-image: url('assets/Enemies/Demon/demon-death10.svg'); }
-            100% { background-image: url('assets/Enemies/Demon/demon-death1.svg'); }
-          }
+            @keyframes demon-death-loop-animation {
+              0% { background-image: url('assets/Enemies/Demon/demon-death1.svg'); }
+              11.11% { background-image: url('assets/Enemies/Demon/demon-death2.svg'); }
+              22.22% { background-image: url('assets/Enemies/Demon/demon-death3.svg'); }
+              33.33% { background-image: url('assets/Enemies/Demon/demon-death4.svg'); }
+              44.44% { background-image: url('assets/Enemies/Demon/demon-death5.svg'); }
+              55.55% { background-image: url('assets/Enemies/Demon/demon-death6.svg'); }
+              66.66% { background-image: url('assets/Enemies/Demon/demon-death7.svg'); }
+              77.77% { background-image: url('assets/Enemies/Demon/demon-death8.svg'); }
+              88.88% { background-image: url('assets/Enemies/Demon/demon-death9.svg'); }
+              100% { background-image: url('assets/Enemies/Demon/demon-death10.svg'); }
+            }
 
           .flying-eye-animation {
             width: 200px;
@@ -1021,33 +1005,33 @@ body {
             83.33% { background-image: url('assets/Enemies/Flying eye/eye6.svg'); }
             100% { background-image: url('assets/Enemies/Flying eye/eye1.svg'); }
           }
-          .eye-death-animation {
+          .flying-eye-death-animation {
             width: 300px;
             height: 300px;
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Flying eye/eye-death1.svg');
+            background-image: url('assets/Enemies/Flying eye/eye-death12.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            animation: eye-death-loop-animation 1.2s steps(9) 1;
+            animation: flying-eye-death-loop-animation 1.2s steps(9) 1;
           }
 
-          @keyframes eye-death-loop-animation {
-            0% { background-image: url('assets/Enemies/Flying eye/eye-death1.svg'); }
-            8.33% { background-image: url('assets/Enemies/Flying eye/eye-death2.svg'); }
-            16.67% { background-image: url('assets/Enemies/Flying eye/eye-death3.svg'); }
-            25% { background-image: url('assets/Enemies/Flying eye/eye-death4.svg'); }
-            33.33% { background-image: url('assets/Enemies/Flying eye/eye-death5.svg'); }
-            41.67% { background-image: url('assets/Enemies/Flying eye/eye-death6.svg'); }
-            50% { background-image: url('assets/Enemies/Flying eye/eye-death7.svg'); }
-            58.33% { background-image: url('assets/Enemies/Flying eye/eye-death8.svg'); }
-            66.67% { background-image: url('assets/Enemies/Flying eye/eye-death9.svg'); }
-            75% { background-image: url('assets/Enemies/Flying eye/eye-death10.svg'); }
-            83.33% { background-image: url('assets/Enemies/Flying eye/eye-death11.svg'); }
-            91.67% { background-image: url('assets/Enemies/Flying eye/eye-death12.svg'); }
-            100% { background-image: url('assets/Enemies/Flying eye/eye-death1.svg'); }
-          }
+        @keyframes flying-eye-death-loop-animation {
+          0% { background-image: url('assets/Enemies/Flying eye/eye-death1.svg'); }
+          8.33% { background-image: url('assets/Enemies/Flying eye/eye-death2.svg'); }
+          16.66% { background-image: url('assets/Enemies/Flying eye/eye-death3.svg'); }
+          25% { background-image: url('assets/Enemies/Flying eye/eye-death4.svg'); }
+          33.33% { background-image: url('assets/Enemies/Flying eye/eye-death5.svg'); }
+          41.66% { background-image: url('assets/Enemies/Flying eye/eye-death6.svg'); }
+          50% { background-image: url('assets/Enemies/Flying eye/eye-death7.svg'); }
+          58.33% { background-image: url('assets/Enemies/Flying eye/eye-death8.svg'); }
+          66.66% { background-image: url('assets/Enemies/Flying eye/eye-death9.svg'); }
+          75% { background-image: url('assets/Enemies/Flying eye/eye-death10.svg'); }
+          83.33% { background-image: url('assets/Enemies/Flying eye/eye-death11.svg'); }
+          100% { background-image: url('assets/Enemies/Flying eye/eye-death12.svg'); }
+        }
+
           .flying-eye-static-animation {
             width: 200px;
             height: 200px;
@@ -1125,7 +1109,7 @@ body {
             height: 300px;
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Skeleton/skeleton-death1.svg');
+            background-image: url('assets/Enemies/Skeleton/skeleton-death14.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -1135,19 +1119,18 @@ body {
           @keyframes skeleton-death-loop-animation {
             0% { background-image: url('assets/Enemies/Skeleton/skeleton-death1.svg'); }
             7.14% { background-image: url('assets/Enemies/Skeleton/skeleton-death2.svg'); }
-            14.29% { background-image: url('assets/Enemies/Skeleton/skeleton-death3.svg'); }
-            21.43% { background-image: url('assets/Enemies/Skeleton/skeleton-death4.svg'); }
-            28.57% { background-image: url('assets/Enemies/Skeleton/skeleton-death5.svg'); }
-            35.71% { background-image: url('assets/Enemies/Skeleton/skeleton-death6.svg'); }
-            42.86% { background-image: url('assets/Enemies/Skeleton/skeleton-death7.svg'); }
+            14.28% { background-image: url('assets/Enemies/Skeleton/skeleton-death3.svg'); }
+            21.42% { background-image: url('assets/Enemies/Skeleton/skeleton-death4.svg'); }
+            28.56% { background-image: url('assets/Enemies/Skeleton/skeleton-death5.svg'); }
+            35.70% { background-image: url('assets/Enemies/Skeleton/skeleton-death6.svg'); }
+            42.84% { background-image: url('assets/Enemies/Skeleton/skeleton-death7.svg'); }
             50% { background-image: url('assets/Enemies/Skeleton/skeleton-death8.svg'); }
             57.14% { background-image: url('assets/Enemies/Skeleton/skeleton-death9.svg'); }
-            64.29% { background-image: url('assets/Enemies/Skeleton/skeleton-death10.svg'); }
-            71.43% { background-image: url('assets/Enemies/Skeleton/skeleton-death11.svg'); }
-            78.57% { background-image: url('assets/Enemies/Skeleton/skeleton-death12.svg'); }
-            85.71% { background-image: url('assets/Enemies/Skeleton/skeleton-death13.svg'); }
-            92.86% { background-image: url('assets/Enemies/Skeleton/skeleton-death14.svg'); }
-            100% { background-image: url('assets/Enemies/Skeleton/skeleton-death1.svg'); }
+            64.28% { background-image: url('assets/Enemies/Skeleton/skeleton-death10.svg'); }
+            71.42% { background-image: url('assets/Enemies/Skeleton/skeleton-death11.svg'); }
+            78.56% { background-image: url('assets/Enemies/Skeleton/skeleton-death12.svg'); }
+            85.70% { background-image: url('assets/Enemies/Skeleton/skeleton-death13.svg'); }
+            100% { background-image: url('assets/Enemies/Skeleton/skeleton-death14.svg'); }
           }
 
           .skeleton-reverse-animation {
@@ -1228,7 +1211,7 @@ body {
             height: 300px;
             bottom: 50px;
             margin: 10px auto;
-            background-image: url('assets/Enemies/Kobold/kobold-death1.svg');
+            background-image: url('assets/Enemies/Kobold/kobold-death9.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
@@ -1236,16 +1219,15 @@ body {
           }
 
          @keyframes kobold-death-loop-animation {
-            0% { background-image: url('assets/Enemies/Kobold/kobold-death1.svg'); }
-            11.11% { background-image: url('assets/Enemies/Kobold/kobold-death2.svg'); }
-            22.22% { background-image: url('assets/Enemies/Kobold/kobold-death3.svg'); }
-            33.33% { background-image: url('assets/Enemies/Kobold/kobold-death4.svg'); }
-            44.44% { background-image: url('assets/Enemies/Kobold/kobold-death5.svg'); }
-            55.55% { background-image: url('assets/Enemies/Kobold/kobold-death6.svg'); }
-            66.66% { background-image: url('assets/Enemies/Kobold/kobold-death7.svg'); }
-            77.77% { background-image: url('assets/Enemies/Kobold/kobold-death8.svg'); }
-            88.88% { background-image: url('assets/Enemies/Kobold/kobold-death9.svg'); }
-            100% { background-image: url('assets/Enemies/Kobold/kobold-death1.svg'); }
+             0% { background-image: url('assets/Enemies/Kobold/kobold-death1.svg'); }
+             11.11% { background-image: url('assets/Enemies/Kobold/kobold-death2.svg'); }
+             22.22% { background-image: url('assets/Enemies/Kobold/kobold-death3.svg'); }
+             33.33% { background-image: url('assets/Enemies/Kobold/kobold-death4.svg'); }
+             44.44% { background-image: url('assets/Enemies/Kobold/kobold-death5.svg'); }
+             55.55% { background-image: url('assets/Enemies/Kobold/kobold-death6.svg'); }
+             66.66% { background-image: url('assets/Enemies/Kobold/kobold-death7.svg'); }
+             77.77% { background-image: url('assets/Enemies/Kobold/kobold-death8.svg'); }
+             100% { background-image: url('assets/Enemies/Kobold/kobold-death9.svg'); }
           }
 
           .kobold-reverse-animation {
