@@ -69,7 +69,7 @@ export default {
           }
         } catch (error) {
           if (error.response) {
-            alert("Registration failed: " + error.response.data['username'][0] || "Unknown error");
+            alert("Registration failed: " + error.response.data || "Unknown error");
             //ошибки в error.response.data лежат в словаре в виде (поле в котором возникла ошибка : массив ошибок в этом поле)
             //я вывожу этот словарь в терминале, в котором запущен сервер джанго, в момент попытки входа или регистрации
           } else if (error.request) {
