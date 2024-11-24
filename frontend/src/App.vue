@@ -24,9 +24,20 @@
   :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Start Fight</a></div>
     </div>
   <div class="fight-row">
-    <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead, 'protagonist-run': protagonistStatus.run, 'protagonist-attack1': protagonistStatus.attack1 }" style=" width: 300px;  height: 300px; margin-top: 80px; "></div>
-    <div :id="'enemy-' + chosenEnemyId" :class="'animation-placeholder ' + getReverseStaticAnimationClass(chosenEnemyId)"
+
+    <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead,
+    'protagonist-run': protagonistStatus.run,
+    'protagonist-attack1': protagonistStatus.attack1,
+    'protagonist-attack3': protagonistStatus.attack3 }"
+         style=" width: 300px;  height: 300px; margin-top: 80px; "></div>
+
+    <div :id="'enemy-' + chosenEnemyId" class="animation-placeholder" :class="{
+         [getReverseStaticAnimationClass(chosenEnemyId)]: enemyStatus.normal,
+         [getAnimationClass(chosenEnemyId)]: enemyStatus.dead,
+         [getAnimationClass(chosenEnemyId)]: enemyStatus.attack,
+       }"
          style=" margin-top: 80px; "></div>
+
   </div>
 </div>
 
@@ -88,8 +99,8 @@ export default {
       userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
-      protagonistIsDead: false,
       fightIsOn: false,
+      lastPunch: 0,
       chosenEnemyId: 1,
       winRate: 0,
       winOdd: 1,
@@ -102,6 +113,7 @@ export default {
         run: false,
       },
       enemyStatus: {
+        normal: true,
         dead: false,
         attack: false,
         defence: false,
@@ -179,32 +191,113 @@ export default {
       this.isUpgradeModalVisible = false;
     },
 
-    makeBet(){
-      if (this.bet > 0 && this.bet <= this.balance) {
-        const winNumber = Math.random();
-        this.balance -= this.bet;
-        //let winner = "";
-        if (winNumber <= this.winRate) {
-          //winner = "You";
-          this.balance += this.bet * this.winOdd;
-        }
-        else {
-          //winner = "Enemy";
-          this.fightIsOn = true;
-          this.protagonistStatus.dead = true;
-          setTimeout(() => {this.protagonistStatus.dead = false;
-            this.fightIsOn = false;}, 1500*2);
-        }
-        this.bet = 10;
-        // winner += " win";
-        // alert(winner);
-      }
-      else if(this.bet > this.balance){
-        alert("You don`t have enough money :(")
-        this.bet = this.balance;
-      }
+    protagonistRun(){
+      return new Promise((resolve) => {
+        this.protagonistStatus.run = true;
+        setTimeout(() => {
+          this.protagonistStatus.run = false;
+          resolve();
+        }, 700 * 2);
+      });
     },
 
+    protagonistAttack1() {
+      return this.protagonistRun().then(() => {
+        return new Promise((resolve) => {
+          this.protagonistStatus.attack1 = true;
+          setTimeout(() => {
+            this.protagonistStatus.attack1 = false;
+            resolve();
+          }, 2500);
+        });
+      });
+    },
+
+    protagonistAttack3() {
+      return this.protagonistRun().then(() => {
+        return new Promise((resolve) => {
+          this.protagonistStatus.attack3 = true;
+          setTimeout(() => {
+            this.protagonistStatus.attack3 = false;
+            resolve();
+          }, 750 * 2);
+        });
+      });
+    },
+
+    protagonistDead() {
+      return new Promise((resolve) => {
+        this.protagonistStatus.dead = true;
+        setTimeout(() => {
+          this.protagonistStatus.dead = false;
+          this.fightIsOn = false;
+          resolve();
+        }, 1500 * 2);
+      });
+    },
+
+    enemyAttack() {
+      return new Promise((resolve) => {
+        this.enemyStatus.normal = false;
+        this.enemyStatus.attack = true;
+        setTimeout(() => {
+          this.enemyStatus.attack = false;
+          this.enemyStatus.normal = true;
+          resolve();
+        }, 1500 * 2);
+      });
+    },
+
+    enemyDead() {
+      return new Promise((resolve) => {
+        this.enemyStatus.normal = false;
+        this.enemyStatus.dead = true;
+        setTimeout(() => {
+          this.enemyStatus.dead = false;
+          this.enemyStatus.normal = true;
+          this.fightIsOn = false;
+          resolve();
+        }, 1500 * 2);
+      });
+    },
+
+    async makeBet() {
+      if (this.bet > this.balance) {
+        alert("You don`t have enough money :(");
+        this.bet = 10;
+        return 0;
+      }
+        const winNumber = Math.random();
+        this.balance -= this.bet;
+        this.fightIsOn = true;
+        let attacks = [0, 1, 1, 0];
+        attacks = attacks.sort(() => Math.random() - 0.5);
+        console.log(attacks);
+
+        for (let i = 0; i < attacks.length; i += 1) {
+          console.log(attacks[i] === 1);
+          if (attacks[i] === 1) {
+            if (Math.random() < 0.5) {
+              await this.protagonistAttack1();
+            } else {
+              await this.protagonistAttack3();
+            }
+          } else {
+            await this.enemyAttack();
+          }
+        }
+
+        if (winNumber <= this.winRate) {
+          await this.protagonistAttack1();
+          await this.enemyDead();
+          this.balance += this.bet * this.winOdd;
+        } else {
+          await this.enemyAttack();
+          await this.protagonistDead();
+        }
+
+        this.bet = 10;
+    },
     getAnimationClass(enemyId) {
       switch (enemyId) {
         case 1:
@@ -593,7 +686,7 @@ body {
 
 .animation-placeholder {
   bottom: 50px;
-  background-image: url('assets/Adventurer/adventurer-idle-00.svg'); /* Первый кадр */
+  background-image: url('assets/Adventurer/adventurer-idle-00.svg');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
@@ -601,88 +694,91 @@ body {
 }
 
 @keyframes loop-animation {
-  0% {
-    background-image: url('assets/Adventurer/adventurer-idle-00.svg');
-  }
-  16% {
-    background-image: url('assets/Adventurer/adventurer-idle-01.svg');
-  }
-  33% {
-    background-image: url('assets/Adventurer/adventurer-idle-02.svg');
-  }
-  50% {
-    background-image: url('assets/Adventurer/adventurer-idle-03.svg');
-  }
-  66% {
-    background-image: url('assets/Adventurer/adventurer-idle-02.svg');
-  }
-  83% {
-    background-image: url('assets/Adventurer/adventurer-idle-01.svg');
-  }
-  100% {
-    background-image: url('assets/Adventurer/adventurer-idle-00.svg');
-  }
+  0% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
+  16% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
+  33% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
+  50% {background-image: url('assets/Adventurer/adventurer-idle-03.svg');}
+  66% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');}
+  83% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
+  100% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
 }
 
-        .protagonist-death{
-          animation: protagonist-death-animation 1.5s steps(6) 2;
-        }
+.protagonist-death{
+  animation: protagonist-death-animation 1.5s steps(6) 2;
+}
 
-        @keyframes protagonist-death-animation {
-          0% {background-image: url('assets/Adventurer/adventurer-die-00.svg'); }
-          16% {background-image: url('assets/Adventurer/adventurer-die-01.svg'); }
-          33% {background-image: url('assets/Adventurer/adventurer-die-02.svg');}
-          50% {background-image: url('assets/Adventurer/adventurer-die-03.svg');}
-          66%{background-image: url('assets/Adventurer/adventurer-die-04.svg');}
-          83% {background-image: url('assets/Adventurer/adventurer-die-05.svg');}
-          100%{background-image: url('assets/Adventurer/adventurer-die-06.svg');}
-        }
+@keyframes protagonist-death-animation {
+  0% {background-image: url('assets/Adventurer/adventurer-die-00.svg'); }
+  16% {background-image: url('assets/Adventurer/adventurer-die-01.svg'); }
+  33% {background-image: url('assets/Adventurer/adventurer-die-02.svg');}
+  50% {background-image: url('assets/Adventurer/adventurer-die-03.svg');}
+  66%{background-image: url('assets/Adventurer/adventurer-die-04.svg');}
+  83% {background-image: url('assets/Adventurer/adventurer-die-05.svg');}
+  100%{background-image: url('assets/Adventurer/adventurer-die-06.svg');}
+}
 
-        .protagonist-run{
-          animation: protagonist-run-animation 0.7s steps(11) 1;
-          transform: translate(40px,0);
-        }
+.protagonist-run{
+  animation: protagonist-run-animation 0.7s steps(6) 2;
+  transition: transform 1.4s ease;
+  transform: translate(220px,0);
+}
 
-        @keyframes protagonist-run-animation {
-          0% {background-image: url('assets/Adventurer/adventurer-run-00.svg'); }
-          16% {background-image: url('assets/Adventurer/adventurer-run-01.svg'); }
-          33% {background-image: url('assets/Adventurer/adventurer-run-02.svg');}
-          50% {background-image: url('assets/Adventurer/adventurer-run-03.svg');}
-          66%{background-image: url('assets/Adventurer/adventurer-run-04.svg');}
-          83% {background-image: url('assets/Adventurer/adventurer-run-05.svg');}
-          100%{background-image: url('assets/Adventurer/adventurer-run-00.svg');}
-        }
+@keyframes protagonist-run-animation {
+  0% {background-image: url('assets/Adventurer/adventurer-run-00.svg'); }
+  16% {background-image: url('assets/Adventurer/adventurer-run-01.svg'); }
+  33% {background-image: url('assets/Adventurer/adventurer-run-02.svg');}
+  50% {background-image: url('assets/Adventurer/adventurer-run-03.svg');}
+  66%{background-image: url('assets/Adventurer/adventurer-run-04.svg');}
+  83% {background-image: url('assets/Adventurer/adventurer-run-05.svg');}
+  100%{background-image: url('assets/Adventurer/adventurer-run-00.svg');}
+}
 
-        .protagonist-attack1{
-          animation: protagonist-attack1-animation 2.5s steps(11) 1;
-        }
+.protagonist-attack1{
+  animation: protagonist-attack1-animation 2.5s steps(11) 1;
+  transform: translate(220px,0);
+}
 
-        @keyframes protagonist-attack1-animation {
-          0% {background-image: url('assets/Adventurer/adventurer-attack1-00.svg'); }
-          9% {background-image: url('assets/Adventurer/adventurer-attack1-01.svg'); }
-          18% {background-image: url('assets/Adventurer/adventurer-attack1-02.svg');}
-          27% {background-image: url('assets/Adventurer/adventurer-attack1-03.svg');}
-          36%{background-image: url('assets/Adventurer/adventurer-attack1-04.svg');}
-          45% {background-image: url('assets/Adventurer/adventurer-attack2-00.svg');}
-          54%{background-image: url('assets/Adventurer/adventurer-attack2-01.svg');}
-          63% {background-image: url('assets/Adventurer/adventurer-attack2-02.svg');}
-          72%{background-image: url('assets/Adventurer/adventurer-attack2-03.svg');}
-          81% {background-image: url('assets/Adventurer/adventurer-attack2-04.svg');}
-          90% {background-image: url('assets/Adventurer/adventurer-attack2-05.svg');}
-          100% {background-image: url('assets/Adventurer/adventurer-attack1-00.svg'); }
-        }
+@keyframes protagonist-attack1-animation {
+  0% {background-image: url('assets/Adventurer/adventurer-attack1-00.svg'); }
+  9% {background-image: url('assets/Adventurer/adventurer-attack1-01.svg'); }
+  18% {background-image: url('assets/Adventurer/adventurer-attack1-02.svg');}
+  27% {background-image: url('assets/Adventurer/adventurer-attack1-03.svg');}
+  36%{background-image: url('assets/Adventurer/adventurer-attack1-04.svg');}
+  45% {background-image: url('assets/Adventurer/adventurer-attack2-00.svg');}
+  54%{background-image: url('assets/Adventurer/adventurer-attack2-01.svg');}
+  63% {background-image: url('assets/Adventurer/adventurer-attack2-02.svg');}
+  72%{background-image: url('assets/Adventurer/adventurer-attack2-03.svg');}
+  81% {background-image: url('assets/Adventurer/adventurer-attack2-04.svg');}
+  90% {background-image: url('assets/Adventurer/adventurer-attack2-05.svg');}
+  100% {background-image: url('assets/Adventurer/adventurer-attack1-00.svg'); }
+}
 
-        .goblin-animation {
-            width: 300px;
-            height: 300px;
-            bottom: 50px;
-            margin: 10px auto;
-            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: goblin-loop-animation 1.5s steps(13) infinite;
-          }
+.protagonist-attack3{
+  animation: protagonist-attack3-animation 0.7s steps(6) 2;
+  transform: translate(220px,0);
+}
+
+@keyframes protagonist-attack3-animation {
+  0% {background-image: url('assets/Adventurer/adventurer-attack3-00.svg'); }
+  16% {background-image: url('assets/Adventurer/adventurer-attack3-01.svg'); }
+  33% {background-image: url('assets/Adventurer/adventurer-attack3-02.svg');}
+  50% {background-image: url('assets/Adventurer/adventurer-attack3-03.svg');}
+  66%{background-image: url('assets/Adventurer/adventurer-attack3-04.svg');}
+  83% {background-image: url('assets/Adventurer/adventurer-attack3-05.svg');}
+  100%{background-image: url('assets/Adventurer/adventurer-attack3-00.svg');}
+}
+
+.goblin-animation {
+  width: 300px;
+  height: 300px;
+  bottom: 50px;
+  margin: 10px auto;
+  background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: goblin-loop-animation 1.5s steps(13) infinite;
+}
 
           @keyframes goblin-loop-animation {
             0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
