@@ -99,6 +99,7 @@ import {authService} from "@/services/auth";
 export default {
   data() {
     return {
+      save: 0,
       balance: 10000,
       maximumBalance: 0,
       bet: 10,
@@ -162,8 +163,11 @@ export default {
   },
 
   updated() {
-    if (this.userLoggedIn)
+    this.save++;
+    if (this.userLoggedIn && this.save >= 3) {
       this.updateData();
+      this.save = 0;
+    }
   },
 
   computed: {
