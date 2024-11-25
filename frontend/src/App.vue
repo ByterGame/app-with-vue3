@@ -158,7 +158,8 @@ export default {
   },
 
   updated() {
-    this.updateData();
+    if (this.userLoggedIn)
+      this.updateData();
   },
 
   computed: {

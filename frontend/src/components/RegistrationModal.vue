@@ -42,7 +42,7 @@ export default {
         }
       } catch (error) {
         if (error.response) {
-            alert("Login failed: " + error.response.data['non_field_errors'][0] || "Unknown error");
+            alert("Login failed: " + error.response.data || "Unknown error");
             //ошибки в error.response.data лежат в словаре в виде (поле в котором возникла ошибка : массив ошибок в этом поле)
             //я вывожу этот словарь в терминале, в котором запущен сервер джанго, в момент попытки входа или регистрации
           } else if (error.request) {
