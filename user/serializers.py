@@ -62,10 +62,11 @@ class UpdateData(serializers.ModelSerializer):
     heroStrength = serializers.IntegerField(default=1)
     heroSpeed = serializers.IntegerField(default=1)
     heroDurability = serializers.IntegerField(default=1)
+    chosenLeague = serializers.IntegerField(default=1)
 
     class Meta:
         model = User
-        fields = ['username', 'money', 'maximumMoney', 'heroStrength', 'heroSpeed', 'heroDurability']
+        fields = ['username', 'money', 'maximumMoney', 'heroStrength', 'heroSpeed', 'heroDurability', 'chosenLeague']
 
     def update(self, instance, validated_data):
         instance.money = validated_data.get('money', instance.money)
@@ -73,5 +74,6 @@ class UpdateData(serializers.ModelSerializer):
         instance.heroStrength = validated_data.get('heroStrength', instance.heroStrength)
         instance.heroSpeed = validated_data.get('heroSpeed', instance.heroSpeed)
         instance.heroDurability = validated_data.get('heroDurability', instance.heroDurability)
+        instance.chosenLeague = validated_data.get('chosenLeague', instance.chosenLeague)
         instance.save()
         return instance

@@ -83,6 +83,7 @@ def getData(request):
                 'heroStrength': user.heroStrength,
                 'heroSpeed': user.heroSpeed,
                 'heroDurability': user.heroDurability,
+                'chosenLeague': user.chosenLeague,
             }
             print(responseData)
             return JsonResponse(responseData)

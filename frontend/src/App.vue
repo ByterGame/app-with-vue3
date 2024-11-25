@@ -122,7 +122,7 @@
 
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
-import MiniGame from "@/components/MiniGame.vue";
+// import MiniGame from "@/components/MiniGame.vue";
 import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
@@ -130,6 +130,7 @@ export default {
   data() {
     return {
       balance: 10000,
+      save: 0,
       maximumBalance: 0,
       bet: 10,
       userLoggedIn: false,
@@ -186,6 +187,7 @@ export default {
     userLoggedIn (oldValue, newValue) {
       if(newValue === false) {
         this.getData();
+        setTimeout(this.loadEnemiesCharacteristics, 75)
         setTimeout(this.calculateWinRate, 150);
         setTimeout(this.calculateWinOdd, 150);
       }
@@ -240,6 +242,7 @@ export default {
           heroStrength: this.character["strength"],
           heroSpeed: this.character["speed"],
           heroDurability: this.character["durability"],
+          chosenLeague: this.chosenLeague,
         });
         if (response.status === 200) {
           console.log('save');
@@ -273,6 +276,7 @@ export default {
         this.character['speed'] = response.data['heroSpeed'];
         this.character['strength'] = response.data['heroStrength'];
         this.character['durability'] = response.data['heroDurability'];
+        this.chosenLeague = response.data['chosenLeague'];
       } catch (error) {
         console.error(error);
       }
@@ -619,7 +623,8 @@ export default {
           await this.protagonistDead();
           this.winner = 'YOU LOSE';
         }
-        this.bet = 10;
+        this.updateData();
+        // this.bet = 10;
     },
     getBombAnimationClass(enemyId) {
       switch (enemyId) {
@@ -766,6 +771,7 @@ export default {
         this.character[characteristic]++;
       }
       this.calculateWinRate();
+      this.updateData();
       // try {
       //   const response = await authService.updateHero({
       //     username: this.usernameFromStore,
@@ -813,11 +819,20 @@ export default {
       }
     },
 
+    loadEnemiesCharacteristics() {
+      for(const enemy of this.enemies){
+        enemy.speed = enemy.speed + 5*this.chosenLeague;
+        enemy.strength = enemy.strength + 5*this.chosenLeague;
+        enemy.durability = enemy.durability + 5*this.chosenLeague;
+      }
+    },
+
     upgradeLeague() {
     if(this.balance >= Math.round(Math.pow(10, this.chosenLeague + 1))){
       this.balance -= Math.round(Math.pow(10, this.chosenLeague + 1));
       this.chosenLeague++;
       this.changeEnemiesCharacteristics();
+      this.updateData();
     }
     else{
       alert("You don`t have enough money");
@@ -828,7 +843,7 @@ export default {
   components: {
     ResultTable,
     RegistrationModal,
-    MiniGame
+    // MiniGame
   },
 }
 
