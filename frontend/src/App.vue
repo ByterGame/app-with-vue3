@@ -3,7 +3,8 @@
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
   <div class="clicker-section">
-    <p class="balance">Balance: $ {{ balance.toFixed(0) }}</p>
+    <div class="balance"><div class="little-button"><a>League {{chosenLeague}}</a></div>
+    <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div></div>
     <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
       <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
     </div>
@@ -17,7 +18,10 @@
   :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Choose Enemy</a></div>
         <div class="bet-row">
             <span>Win Rate: {{(winRate * 100).toFixed(1)}}%</span>
-            <input type="number" v-model="bet" min="10" v-bind:max="balance">
+          <div class="column">
+            <input type="number" v-model="bet" min="10" v-bind:max="Math.pow(chosenLeague*20,2)">
+          <label style="margin-top: 10px">Max: {{Math.pow(chosenLeague*20,2).toFixed(0)}}.$</label>
+          </div>
           <span>Win Odds: {{winOdd.toFixed(1)}}</span>
         </div>
         <div class="little-button" @click="makeBet" :class="{'disabled': fightIsOn}"
@@ -29,7 +33,7 @@
     'protagonist-run': protagonistStatus.run,
     'protagonist-attack1': protagonistStatus.attack1,
     'protagonist-attack3': protagonistStatus.attack3,
-    'protagonist-attacked': protagonistStatus.attacked }"
+     'filter': protagonistStatus.attacked || protagonistStatus.dead}"
          style=" width: 300px;  height: 300px; margin-bottom: 100px;"></div>
 <div v-if="chosenEnemyId === 1 || chosenEnemyId === 3 || chosenEnemyId === 5" :class="{[getBombAnimationClass(chosenEnemyId)] : enemyStatus.bomb}"></div>
     <div :id="'enemy-' + chosenEnemyId" class="animation-placeholder" :class="{
@@ -37,8 +41,7 @@
          [getDeathAnimationClass(chosenEnemyId)]: enemyStatus.dead,
          [getAttackAnimationClass(chosenEnemyId)]: enemyStatus.attack,
          [getRunAnimationClass(chosenEnemyId)]: enemyStatus.run,
-         [getAttackedAnimationClass(chosenEnemyId)]: enemyStatus.attacked,
-         }">
+         'filter': enemyStatus.attacked || enemyStatus.dead,}">
     </div>
 
   </div>
@@ -106,6 +109,7 @@ export default {
       fightIsOn: false,
       lastPunch: 0,
       chosenEnemyId: 1,
+      chosenLeague: 1,
       winRate: 0,
       winOdd: 1,
       protagonistStatus: {
@@ -261,8 +265,10 @@ export default {
         this.lastPunch = 1;
         return new Promise((resolve) => {
           this.protagonistStatus.attack1 = true;
+          this.enemyStatus.attacked = true;
           setTimeout(() => {
             this.protagonistStatus.attack1 = false;
+            this.enemyStatus.attacked = false;
             resolve();
           }, 1100);
         });
@@ -349,9 +355,11 @@ export default {
         return new Promise((resolve) => {
           this.enemyStatus.normal = false;
           this.enemyStatus.attack = true;
+          this.protagonistStatus.attacked = true;
           setTimeout(() => {
             this.enemyStatus.attack = false;
             this.enemyStatus.normal = true;
+            this.protagonistStatus.attacked = false;
             resolve();
           }, 800 * 2);
         });
@@ -394,15 +402,17 @@ export default {
       }
       return new Promise((resolve) => {
         this.lastPunch = 2;
-        this.enemyStatus.normal = false;
         this.enemyStatus.attack = true;
+        this.enemyStatus.normal = false;
+        this.enemyStatus.bomb = true;
         this.protagonistStatus.attacked = true;
         setTimeout(() => {
           this.enemyStatus.attack = false;
           this.enemyStatus.normal = true;
+          this.enemyStatus.bomb = false;
           this.protagonistStatus.attacked = false;
           resolve();
-        }, 800*2);
+        }, 800 * 2);
       });
     },
 
@@ -483,24 +493,6 @@ export default {
           return 'demon-animation';
         case 6:
           return 'kobold-animation';
-        default:
-          return '';
-      }
-    },
-    getAttackedAnimationClass(enemyId) {
-      switch (enemyId) {
-        case 1:
-          return 'goblin-attacked-animation';
-        case 3:
-          return 'flying-eye-attacked-animation';
-        case 2:
-          return 'dead-attacked-animation';
-        case 4:
-          return 'skeleton-attacked-animation';
-        case 5:
-          return 'demon-attacked-animation';
-        case 6:
-          return 'kobold-attacked-animation';
         default:
           return '';
       }
@@ -922,25 +914,6 @@ body {
   83% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');}
   100% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');}
 }
-.protagonist-attacked {
-  filter: sepia(1) saturate(5) hue-rotate(-30deg);
-  bottom: 50px;
-  background-image: url('assets/Adventurer/adventurer-idle-00.svg');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  animation: protagonist-attacked-loop-animation 1.2s steps(6) infinite;
-}
-
-@keyframes protagonist-attacked-loop-animation {
-  0% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-  16% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-  33% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-  50% {background-image: url('assets/Adventurer/adventurer-idle-03.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-  66% {background-image: url('assets/Adventurer/adventurer-idle-02.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-  83% {background-image: url('assets/Adventurer/adventurer-idle-01.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-  100% {background-image: url('assets/Adventurer/adventurer-idle-00.svg');filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-}
 
 .protagonist-death{
   width: 310px;
@@ -959,9 +932,9 @@ body {
 }
 
 .protagonist-run{
-  animation: protagonist-run-animation 0.7s steps(6) 2;
+  animation: protagonist-run-animation 0.7s steps(6) infinite;
   transition: transform 1.4s ease;
-  transform: translate(220px,0);
+  transform: translate(200px,0);
 }
 
 @keyframes protagonist-run-animation {
@@ -975,8 +948,8 @@ body {
 }
 
 .protagonist-attack1{
-  animation: protagonist-attack1-animation 1.5s steps(11) 1;
-  transform: translate(220px,0);
+  animation: protagonist-attack1-animation 1.5s steps(11) infinite;
+  transform: translate(200px,0);
 }
 
 @keyframes protagonist-attack1-animation {
@@ -995,8 +968,8 @@ body {
 }
 
 .protagonist-attack3{
-  animation: protagonist-attack3-animation 0.7s steps(6) 2;
-  transform: translate(220px,0);
+  animation: protagonist-attack3-animation 0.7s steps(6) infinite;
+  transform: translate(200px,0);
 }
 
 @keyframes protagonist-attack3-animation {
@@ -1015,9 +988,6 @@ body {
             height: 300px;
             bottom: 50px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: goblin-loop-animation 1.5s steps(13) infinite;
           }
 
@@ -1037,14 +1007,12 @@ body {
             100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
           }
           .goblin-death-animation {
-            width: 300px;
-            height: 300px;
+            width: 230px;
+            height: 230px;
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death8.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
+            transform: translate(-15px, -20px);
             animation: goblin-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1063,11 +1031,9 @@ body {
             width: 300px;
             height: 300px;
             bottom: 50px;
+            transform: translate(-40px,10px);
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: goblin_static-loop-animation 1.1s steps(7) infinite;
           }
 
@@ -1080,37 +1046,14 @@ body {
             83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin6.svg'); }
             100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); }
           }
-          .goblin-attacked-animation {
-            filter: sepia(1) saturate(5) hue-rotate(-30deg);
-            width: 300px;
-            height: 300px;
-            bottom: 50px;
-            margin-bottom: 100px;
-            background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: goblin-attacked-loop-animation 1.1s steps(7) infinite;
-          }
 
-          @keyframes goblin-attacked-loop-animation {
-            0% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            16.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin2.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            33.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin3.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            50% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin4.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            66.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin5.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            83.33% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin6.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-          }
           .goblin_reverse-animation {
             width: 300px;
             height: 300px;
             bottom: 50px;
+            transform: translate(-40px,10px);
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: goblin_reverse-loop-animation 1.5s steps(13) infinite;
           }
 
@@ -1129,15 +1072,14 @@ body {
             91.67% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse12.svg'); }
             100% { background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg'); }
           }
+
           .goblin_reverse_static-animation {
             width: 300px;
             height: 300px;
             bottom: 50px;
+            transform: translate(-40px,10px);
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse_static1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: goblin_reverse_static-loop-animation 1.1s steps(7) infinite;
           }
 
@@ -1157,9 +1099,6 @@ body {
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Dead/dead_animation/dead1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: dead-loop-animation 1.2s steps(9) infinite;
           }
 
@@ -1181,9 +1120,6 @@ body {
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Dead/dead_animation/dead-death12.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: dead-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1208,9 +1144,6 @@ body {
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Dead/dead_animation/dead-reverse1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             transform: translate(-220px, 0px);
             transition: transform 1.2s ease;
             animation: dead-reverse-loop-animation 1.2s steps(9) infinite;
@@ -1234,9 +1167,6 @@ body {
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: dead-reverse-static-animation-loop-animation 1.2s steps(9) infinite;
           }
 
@@ -1252,40 +1182,12 @@ body {
             100% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg'); }
           }
 
-          .dead-attacked-animation {
-            filter: sepia(1) saturate(5) hue-rotate(-30deg);
-            width: 250px;
-            height: 250px;
-            bottom: 50px;
-            margin-bottom: 100px;
-            background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: dead-attacked-animation-loop-animation 1.2s steps(9) infinite;
-          }
-
-          @keyframes dead-attacked-animation-loop-animation {
-            0% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            12.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse2.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            25% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse3.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            37.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse4.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            50% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse5.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            62.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse6.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            75% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse7.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            87.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse8.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            100% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-          }
-
           .demon-animation {
             width: 250px;
             height: 250px;
             bottom: 50px;
             margin-bottom: 100px;
-            background-image: url('assets/Enemies/Demon/demon-static1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
+            background-image: url('assets/Enemies/Demon/demon1.svg');
             animation: demon-loop-animation 0.6s steps(9) infinite;
           }
 
@@ -1296,15 +1198,13 @@ body {
             75% { background-image: url('assets/Enemies/Demon/demon-static4.svg'); }
             100% { background-image: url('assets/Enemies/Demon/demon-static1.svg'); }
           }
+
           .demon-attack-animation {
             width: 250px;
             height: 250px;
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Demon/demon1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: demon-attack-loop-animation 0.6s steps(9) infinite;
           }
 
@@ -1319,35 +1219,13 @@ body {
             87.5% { background-image: url('assets/Enemies/Demon/demon8.svg'); }
             100% { background-image: url('assets/Enemies/Demon/demon1.svg'); }
           }
-          .demon-attacked-animation {
-            filter: sepia(1) saturate(5) hue-rotate(-30deg);
-            width: 250px;
-            height: 250px;
-            bottom: 50px;
-            margin-bottom: 100px;
-            background-image: url('assets/Enemies/Demon/demon1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: demon-attacked-loop-animation 0.6s steps(9) infinite;
-          }
 
-          @keyframes demon-attacked-loop-animation {
-            0% { background-image: url('assets/Enemies/Demon/demon-static1.svg'); }
-            25% { background-image: url('assets/Enemies/Demon/demon-static2.svg'); }
-            50% { background-image: url('assets/Enemies/Demon/demon-static3.svg'); }
-            75% { background-image: url('assets/Enemies/Demon/demon-static4.svg'); }
-            100% { background-image: url('assets/Enemies/Demon/demon-static1.svg'); }
-          }
           .demon-death-animation {
             width: 300px;
             height: 300px;
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Demon/demon-death10.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: demon-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1370,9 +1248,6 @@ body {
             bottom: 50px;
             margin-bottom: 150px;
             background-image: url('assets/Enemies/Flying eye/eye1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: flying-eye-loop-animation 1.1s steps(7) infinite;
           }
 
@@ -1392,9 +1267,6 @@ body {
             bottom: 50px;
             margin-bottom: 150px;
             background-image: url('assets/Enemies/Flying eye/eye-death12.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: flying-eye-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1412,15 +1284,13 @@ body {
           83.33% { background-image: url('assets/Enemies/Flying eye/eye-death11.svg'); }
           100% { background-image: url('assets/Enemies/Flying eye/eye-death12.svg'); }
         }
+
           .flying-eye-reverse-static-animation {
             width: 200px;
             height: 200px;
             bottom: 50px;
             margin-bottom: 150px;
             background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: flying-eye-reverse-static-loop-animation 1.1s steps(7) infinite;
           }
 
@@ -1431,15 +1301,13 @@ body {
             75% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg'); transform: translate(0, 5%);}
             100% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat2.svg'); transform: translate(0, 0%);}
           }
+
           .flying-eye-attack-animation {
             width: 200px;
             height: 200px;
             bottom: 50px;
             margin-bottom: 150px;
             background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: flying-eye-attack-loop-animation 1.1s steps(7) infinite;
           }
 
@@ -1469,26 +1337,6 @@ body {
             75% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg'); transform: translate(0, 5%);}
             100% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat2.svg'); transform: translate(0, 0%);}
           }
-          .flying-eye-attacked-animation {
-            filter: sepia(1) saturate(5) hue-rotate(-30deg);
-            margin-bottom: 150px;
-            width: 200px;
-            height: 200px;
-            bottom: 50px;
-            background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: flying-eye-attacked-loop-animation 1.1s steps(7) infinite;
-          }
-
-          @keyframes flying-eye-attacked-loop-animation {
-            0% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat2.svg'); }
-            25% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg'); transform: translate(0, 5%);}
-            50% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat2.svg'); transform: translate(0, 10%);}
-            75% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg'); transform: translate(0, 5%);}
-            100% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat2.svg'); transform: translate(0, 0%);}
-          }
 
           .skeleton-animation {
               width: 250px;
@@ -1496,9 +1344,6 @@ body {
               bottom: 50px;
               margin-bottom: 100px;
               background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
               animation: skeleton-loop-animation 1.8s steps(7) infinite;
             }
 
@@ -1530,9 +1375,6 @@ body {
               bottom: 50px;
               margin-bottom: 100px;
               background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
               transform: translate(-220px, -5px);
               transition: transform 1.6s ease;
               animation: skeleton-walk-loop-animation 0.8s steps(7) 2;
@@ -1561,9 +1403,6 @@ body {
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Skeleton/skeleton-death14.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: skeleton-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1588,12 +1427,8 @@ body {
               width: 240px;
               height: 240px;
               margin-bottom: 100px;
-              margin-bottom: 150px;
               transform: translate(-250px,-30px);
               background-image: url('assets/Enemies/Skeleton/skeleton-reverse1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
               animation: skeleton-reverse-loop-animation 1.8s steps(7) infinite;
             }
 
@@ -1625,9 +1460,6 @@ body {
               bottom: 50px;
               margin-bottom: 100px;
               background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
               animation: skeleton-reverse-static-animation-loop-animation 0.7s steps(7) infinite;
             }
 
@@ -1639,27 +1471,7 @@ body {
             80% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static5.svg'); }
             100% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static1.svg'); }
         }
-          .skeleton-attacked-animation {
-              filter: sepia(1) saturate(5) hue-rotate(-30deg);
-              width: 190px;
-              height: 190px;
-              bottom: 50px;
-              margin-bottom: 100px;
-              background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
-              animation: skeleton-attacked-animation-loop-animation 0.7s steps(7) infinite;
-            }
 
-          @keyframes skeleton-attacked-animation-loop-animation {
-            0% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            20% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static2.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            40% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static3.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            60% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static4.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            80% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static5.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            100% { background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-        }
 
         .kobold-animation {
               width: 210px;
@@ -1667,9 +1479,6 @@ body {
               bottom: 50px;
               margin-bottom: 100px;
               background-image: url('assets/Enemies/Kobold/kobold-attack1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
               animation: kobold-animation-loop-animation 0.8s steps(7) infinite;
             }
 
@@ -1681,39 +1490,16 @@ body {
             80% { background-image: url('assets/Enemies/Kobold/kobold-attack5.svg'); }
             100% { background-image: url('assets/Enemies/Kobold/kobold-attack1.svg'); }
         }
-          .kobold-attacked-animation {
-              filter: sepia(1) saturate(5) hue-rotate(-30deg);
-              width: 230px;
-              height: 230px;
-              bottom: 50px;
-              margin-bottom: 100px;
-              background-image: url('assets/Enemies/Kobold/kobold-attack1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
-              animation: kobold-attacked-animation-loop-animation 0.8s steps(7) infinite;
-            }
 
-          @keyframes kobold-attacked-animation-loop-animation {
-            0% { background-image: url('assets/Enemies/Kobold/kobold-attack1.svg'); }
-            20% { background-image: url('assets/Enemies/Kobold/kobold-attack2.svg'); }
-            40% { background-image: url('assets/Enemies/Kobold/kobold-attack3.svg'); }
-            60% { background-image: url('assets/Enemies/Kobold/kobold-attack4.svg'); }
-            80% { background-image: url('assets/Enemies/Kobold/kobold-attack5.svg'); }
-            100% { background-image: url('assets/Enemies/Kobold/kobold-attack1.svg'); }
-        }
           .kobold-run-animation {
               width: 300px;
               height: 300px;
               bottom: 50px;
               margin-bottom: 100px;
               background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
-              transform: translate(-220px, 0);
-              transition: transform 1.6s ease;
-              animation: kobold-run-animation-loop 0.6s steps(7) infinite;
+              transform: translate(-220px, 10px);
+              transition: transform 1.4s ease;
+              animation: kobold-run-animation-loop 0.5s steps(7) infinite;
             }
 
           @keyframes kobold-run-animation-loop {
@@ -1729,14 +1515,12 @@ body {
         }
 
           .kobold-death-animation {
-            width: 280px;
-            height: 280px;
+            width: 270px;
+            height: 270px;
             bottom: 50px;
             margin-bottom: 100px;
+            transform: translate(0,20px);
             background-image: url('assets/Enemies/Kobold/kobold-death9.svg');
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
             animation: kobold-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1753,15 +1537,12 @@ body {
           }
 
           .kobold-reverse-animation {
-              width: 280px;
-              height: 280px;
+              width: 270px;
+              height: 270px;
               bottom: 50px;
               margin-bottom: 100px;
-              transform: translate(-220px, 0);
+              transform: translate(-220px, 10px);
               background-image: url('assets/Enemies/Kobold/kobold-attack-reverse1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
               animation: kobold-reverse-animation-loop-animation 0.6s steps(7) infinite;
             }
 
@@ -1773,16 +1554,14 @@ body {
             80% { background-image: url('assets/Enemies/Kobold/kobold-attack-reverse5.svg'); }
             100% { background-image: url('assets/Enemies/Kobold/kobold-attack-reverse1.svg'); }
         }
+
           .kobold-static-animation {
-              width: 280px;
-              height: 280px;
+              width: 270px;
+              height: 270px;
               bottom: 50px;
               margin-bottom: 100px;
               background-image: url('assets/Enemies/Kobold/kobold-static1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
-            transform: translate(0,10px);
+              transform: translate(0,30px);
               animation: kobold-static-animation-loop-animation 1.2s steps(7) infinite;
             }
 
@@ -1795,27 +1574,7 @@ body {
             100% { background-image: url('assets/Enemies/Kobold/kobold-static1.svg'); }
         }
 
-          .kobold-attacked-animation {
-              filter: sepia(1) saturate(5) hue-rotate(-30deg);
-              width: 300px;
-              height: 300px;
-              bottom: 50px;
-              margin-bottom: 100px;
-              background-image: url('assets/Enemies/Kobold/kobold-static1.svg');
-              background-size: contain;
-              background-position: center;
-              background-repeat: no-repeat;
-              animation: kobold-attacked-animation-loop-animation 1.2s steps(7) infinite;
-            }
 
-          @keyframes kobold-attacked-animation-loop-animation {
-            0% { background-image: url('assets/Enemies/Kobold/kobold-static1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            20% { background-image: url('assets/Enemies/Kobold/kobold-static2.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            40% { background-image: url('assets/Enemies/Kobold/kobold-static3.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            60% { background-image: url('assets/Enemies/Kobold/kobold-static4.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            80% { background-image: url('assets/Enemies/Kobold/kobold-static5.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-            100% { background-image: url('assets/Enemies/Kobold/kobold-static1.svg'); filter: sepia(1) saturate(5) hue-rotate(-30deg);}
-        }
         .bomb-animation {
           width: 300px;
           height: 300px;
@@ -1855,7 +1614,7 @@ body {
             width: 70px;
             height: 70px;
             position: absolute;
-            margin-bottom: 90px;
+            margin-bottom: 20px;
             left: 52%;
             bottom: 50px;
             background-image: url('assets/Enemies/Fire/fire1.svg');
@@ -1979,6 +1738,10 @@ body {
   flex-direction: column;
 }
 
+.bet-row input {
+  width: 80%;
+}
+
 .row {
   display: flex;
   flex-direction: row;
@@ -1986,4 +1749,9 @@ body {
   height: 30px;
   align-items: center;
 }
+
+.filter {
+  filter: sepia(1) saturate(5) hue-rotate(-30deg);
+}
+
 </style>
