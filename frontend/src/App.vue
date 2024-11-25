@@ -3,7 +3,7 @@
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
   <div class="clicker-section">
-    <div class="balance"><div class="little-button"><a>League {{chosenLeague}}</a></div>
+    <div class="balance"><div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
     <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div></div>
     <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
       <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
@@ -20,7 +20,7 @@
             <span>Win Rate: {{(winRate * 100).toFixed(1)}}%</span>
           <div class="column">
             <input type="number" v-model="bet" min="10" v-bind:max="Math.pow(chosenLeague*20,2)">
-          <label style="margin-top: 10px">Max: {{Math.pow(chosenLeague*20,2).toFixed(0)}}.$</label>
+          <label style="margin-top: 10px">Max: {{Math.round(Math.pow(chosenLeague*20,2))}}$</label>
           </div>
           <span>Win Odds: {{winOdd.toFixed(1)}}</span>
         </div>
@@ -33,6 +33,7 @@
     'protagonist-run': protagonistStatus.run,
     'protagonist-attack1': protagonistStatus.attack1,
     'protagonist-attack3': protagonistStatus.attack3,
+    'protagonist-reverse-run': protagonistStatus.reverseRun,
      'filter': protagonistStatus.attacked || protagonistStatus.dead}"
          style=" width: 300px;  height: 300px; margin-bottom: 10vh;"></div>
 <div v-if="chosenEnemyId === 1 || chosenEnemyId === 3 || chosenEnemyId === 5" :class="{[getBombAnimationClass(chosenEnemyId)] : enemyStatus.bomb}"></div>
@@ -41,6 +42,7 @@
          [getDeathAnimationClass(chosenEnemyId)]: enemyStatus.dead,
          [getAttackAnimationClass(chosenEnemyId)]: enemyStatus.attack,
          [getRunAnimationClass(chosenEnemyId)]: enemyStatus.run,
+         [getReverseRunAnimationClass(chosenEnemyId)]: enemyStatus.reverseRun,
          'filter': enemyStatus.attacked || enemyStatus.dead,}">
     </div>
 
@@ -88,6 +90,29 @@
       </div>
     </div>
   </div>
+  <div v-if="isLeagueModalVisible" class="modal" id="league-modal" style="width: 35%;">
+    <h2>Upgrade Your League!</h2>
+    <div class="modal-content">
+      <div class="column" style="margin-top: 50px; gap: 50px; align-items: center; text-align: center;">
+        <div  class="row" style="margin-top: 50px;">
+          <div class="column">
+          <p>You are in league: {{chosenLeague}}</p>
+          <p>Next league: {{chosenLeague + 1}}</p>
+          </div>
+          <div class="column">
+          <p>Max bet: {{Math.round(Math.pow(chosenLeague * 20 , 2))}}</p>
+          <p>Max bet: {{Math.round(Math.pow((chosenLeague + 1) * 20, 2))}}</p>
+          </div>
+          <div class="column">
+          <p>$ for 1 click: {{Math.round(Math.pow(3, chosenLeague - 1))}}</p>
+          <p>$ for 1 click: {{Math.round(Math.pow(3, chosenLeague))}}</p>
+          </div>
+        </div>
+        <div class="little-button" @click="upgradeLeague" style="margin-top: 50px;"><a>Upgrade</a><p>{{Math.round(Math.pow(10, chosenLeague + 1))}} $</p>
+          <p style="color: red;">Alert! Once you upgrade your league, your enemies will become stronger.</p></div>
+      </div>
+    </div>
+  </div>
   <div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
 </template>
 
@@ -105,8 +130,10 @@ export default {
       userLoggedIn: false,
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
+      isLeagueModalVisible: false,
       fightIsOn: false,
       lastPunch: 0,
+      nextPunch: 0,
       chosenEnemyId: 1,
       chosenLeague: 1,
       winRate: 0,
@@ -118,6 +145,7 @@ export default {
         attack3: false,
         attacked: false,
         run: false,
+        reverseRun: false,
       },
       enemyStatus: {
         normal: true,
@@ -125,6 +153,7 @@ export default {
         attack: false,
         attacked: false,
         run: false,
+        reverseRun: false,
         bomb: false,
       },
       priceList: {
@@ -168,7 +197,7 @@ export default {
 
   computed: {
     isModalVisible() {
-      return this.isEnemyModalVisible || this.isUpgradeModalVisible;
+      return this.isEnemyModalVisible || this.isUpgradeModalVisible || this.isLeagueModalVisible;
     },
     usernameFromStore() {
       return this.$store.state.username;
@@ -177,7 +206,7 @@ export default {
 
   methods: {
     addMoney() {
-      this.balance++;
+      this.balance+= (Math.round(Math.pow(3, this.chosenLeague - 1)));
       if (this.balance > this.maximumBalance) {
         this.maximumBalance = this.balance;
       }
@@ -241,9 +270,14 @@ export default {
       this.isUpgradeModalVisible = true;
     },
 
+    openLeagueModal(){
+      this.isLeagueModalVisible = true;
+    },
+
     closeModals() {
       this.isEnemyModalVisible = false;
       this.isUpgradeModalVisible = false;
+      this.isLeagueModalVisible = false;
     },
 
     protagonistRun(){
@@ -252,11 +286,45 @@ export default {
         setTimeout(() => {
           this.protagonistStatus.run = false;
           resolve();
-        }, 700 * 2);
+        }, 500 * 2);
       });
     },
 
     protagonistAttack1() {
+      if(this.nextPunch === 2) {
+        if (this.lastPunch === 1) {
+          this.lastPunch = 1;
+          return new Promise((resolve) => {
+            this.protagonistStatus.attack1 = true;
+            this.enemyStatus.attacked = true;
+            setTimeout(() => {
+              this.protagonistStatus.attack1 = false;
+              this.enemyStatus.attacked = false;
+              this.protagonistStatus.reverseRun = true;
+              setTimeout(() => {
+                this.protagonistStatus.reverseRun = false;
+                resolve();
+              }, 700);
+            }, 1100);
+          });
+        }
+        return this.protagonistRun().then(() => {
+          this.lastPunch = 1;
+          return new Promise((resolve) => {
+            this.protagonistStatus.attack1 = true;
+            this.enemyStatus.attacked = true;
+            setTimeout(() => {
+              this.protagonistStatus.attack1 = false;
+              this.enemyStatus.attacked = false;
+              this.protagonistStatus.reverseRun = true;
+              setTimeout(() => {
+                this.protagonistStatus.reverseRun = false;
+                resolve();
+              }, 700);
+            }, 1100);
+          });
+        });
+      }
       if(this.lastPunch === 1 ){
         this.lastPunch = 1;
         return new Promise((resolve) => {
@@ -284,6 +352,40 @@ export default {
     },
 
     protagonistAttack3() {
+      if(this.nextPunch === 2){
+        if(this.lastPunch === 1 ){
+        this.lastPunch = 1;
+        return new Promise((resolve) => {
+          this.protagonistStatus.attack3 = true;
+          this.enemyStatus.attacked = true;
+          setTimeout(() => {
+            this.protagonistStatus.attack3 = false;
+            this.enemyStatus.attacked = false;
+            this.protagonistStatus.reverseRun = true;
+              setTimeout(() => {
+                this.protagonistStatus.reverseRun = false;
+                resolve();
+              }, 700);
+            }, 600 * 2);
+          });
+      }
+      return this.protagonistRun().then(() => {
+        this.lastPunch = 1;
+        return new Promise((resolve) => {
+          this.protagonistStatus.attack3 = true;
+          this.enemyStatus.attacked = true;
+          setTimeout(() => {
+            this.protagonistStatus.attack3 = false;
+            this.enemyStatus.attacked = false;
+            this.protagonistStatus.reverseRun = true;
+              setTimeout(() => {
+                this.protagonistStatus.reverseRun = false;
+                resolve();
+              }, 700);
+            }, 600 * 2);
+          });
+        });
+      }
       if(this.lastPunch === 1 ){
         this.lastPunch = 1;
         return new Promise((resolve) => {
@@ -347,19 +449,39 @@ export default {
     enemyAttack() {
       if(this.chosenEnemyId === 4 || this.chosenEnemyId === 6){
         if(this.lastPunch === 2){
-        this.lastPunch = 2;
-        return new Promise((resolve) => {
-          this.enemyStatus.normal = false;
-          this.enemyStatus.attack = true;
-          this.protagonistStatus.attacked = true;
-          setTimeout(() => {
-            this.enemyStatus.attack = false;
-            this.enemyStatus.normal = true;
-            this.protagonistStatus.attacked = false;
-            resolve();
-          }, 800 * 2);
+          this.lastPunch = 2;
+          return new Promise((resolve) => {
+            this.enemyStatus.normal = false;
+            this.enemyStatus.attack = true;
+            this.protagonistStatus.attacked = true;
+            setTimeout(() => {
+              this.enemyStatus.attack = false;
+              this.enemyStatus.normal = true;
+              this.protagonistStatus.attacked = false;
+              resolve();
+            }, 800 * 2);
+          });
+        }
+        if(this.nextPunch === 1){
+          return this.enemyRun().then(() => {
+          this.lastPunch = 2;
+          return new Promise((resolve) => {
+            this.enemyStatus.normal = false;
+            this.protagonistStatus.attacked = true;
+            this.enemyStatus.attack = true;
+            setTimeout(() => {
+              this.enemyStatus.attack = false;
+              this.protagonistStatus.attacked = false;
+              this.enemyStatus.reverseRun = true;
+              setTimeout(() => {
+                this.enemyStatus.reverseRun = false;
+                this.enemyStatus.normal = true;
+                resolve();
+                }, 800);
+            }, 800 * 2);
+          });
         });
-      }
+        }
       return this.enemyRun().then(() => {
         this.lastPunch = 2;
         return new Promise((resolve) => {
@@ -370,42 +492,42 @@ export default {
             this.enemyStatus.attack = false;
             this.enemyStatus.normal = true;
             this.protagonistStatus.attacked = false;
-            resolve();
-          }, 800 * 2);
+            this.enemyStatus.reverseRun = true;
+              setTimeout(() => {
+                this.enemyStatus.reverseRun = false;
+                this.enemyStatus.normal = true;
+                resolve();
+                }, 800);
+            }, 800 * 2);
         });
       });
       }
       if(this.chosenEnemyId === 1 || this.chosenEnemyId === 3 || this.chosenEnemyId === 5){
-        if(this.lastPunch === 2){
-        this.lastPunch = 2;
-      }
-      return this.enemyBomb().then(() => {
-        this.lastPunch = 2;
-        return new Promise((resolve) => {
-          this.enemyStatus.normal = true;
-          this.enemyStatus.attack = false;
-          this.enemyStatus.bomb = true;
-          this.protagonistStatus.attacked = true;
-          setTimeout(() => {
-            this.enemyStatus.normal = true;
-            this.enemyStatus.attack = false;
-            this.enemyStatus.bomb = false;
-            this.protagonistStatus.attacked = false;
-            resolve();
-          }, 800);
-        });
-      });
+          return this.enemyBomb().then(() => {
+            this.lastPunch = 2;
+            return new Promise((resolve) => {
+              this.enemyStatus.normal = true;
+              this.enemyStatus.attack = false;
+              this.enemyStatus.bomb = true;
+              this.protagonistStatus.attacked = true;
+              setTimeout(() => {
+                this.enemyStatus.normal = true;
+                this.enemyStatus.attack = false;
+                this.enemyStatus.bomb = false;
+                this.protagonistStatus.attacked = false;
+                resolve();
+              }, 800);
+            });
+          });
       }
       return new Promise((resolve) => {
         this.lastPunch = 2;
         this.enemyStatus.attack = true;
         this.enemyStatus.normal = false;
-        this.enemyStatus.bomb = true;
         this.protagonistStatus.attacked = true;
         setTimeout(() => {
           this.enemyStatus.attack = false;
           this.enemyStatus.normal = true;
-          this.enemyStatus.bomb = false;
           this.protagonistStatus.attacked = false;
           resolve();
         }, 800 * 2);
@@ -432,6 +554,11 @@ export default {
         this.bet = 10;
         return 0;
       }
+      if (this.bet > Math.round(Math.pow(this.chosenLeague*20,2))){
+        alert("Upgrade your league to make higher bets!");
+        this.bet = 10;
+        return 0;
+      }
         const winNumber = Math.random();
         this.balance -= this.bet;
         this.fightIsOn = true;
@@ -441,6 +568,14 @@ export default {
 
         for (let i = 0; i < attacks.length; i += 1) {
           console.log(attacks[i] === 1);
+          if(i + 1 >= attacks.length) {
+            if(winNumber <= this.winRate) this.nextPunch = 1;
+            else this.nextPunch = 2;
+          }
+          else{
+            if(attacks[i+1] === 0) this.nextPunch = 2;
+            else this.nextPunch = 1;
+          }
           if (attacks[i] === 1) {
             if (Math.random() < 0.5) {
               await this.protagonistAttack1();
@@ -453,10 +588,12 @@ export default {
         }
 
         if (winNumber <= this.winRate) {
+          this.nextPunch = 2;
           await this.protagonistAttack1();
           await this.enemyDead();
           this.balance += this.bet * this.winOdd;
         } else {
+          this.nextPunch = 1;
           await this.enemyAttack();
           await this.protagonistDead();
         }
@@ -579,6 +716,17 @@ export default {
       }
     },
 
+    getReverseRunAnimationClass(enemyId) {
+      switch (enemyId) {
+        case 4:
+          return 'skeleton-reverse-walk-animation';
+        case 6:
+          return 'kobold-reverse-run-animation';
+        default:
+          return '';
+      }
+    },
+
     handleLogin(value) {
       this.userLoggedIn = value;
     },
@@ -627,7 +775,27 @@ export default {
       this.chosenEnemyId = id;
       this.calculateWinRate();
     },
+
+    changeEnemiesCharacteristics(){
+      for(const enemy of this.enemies){
+        enemy.speed = enemy.speed + 5;
+        enemy.strength = enemy.strength + 5;
+        enemy.durability = enemy.durability + 5;
+      }
+    },
+
+    upgradeLeague() {
+    if(this.balance >= Math.round(Math.pow(10, this.chosenLeague + 1))){
+      this.balance -= Math.round(Math.pow(10, this.chosenLeague + 1));
+      this.chosenLeague++;
+      this.changeEnemiesCharacteristics();
+    }
+    else{
+      alert("You don`t have enough money");
+    }
+    },
   },
+
   components: {
     RegistrationModal
   },
@@ -941,6 +1109,22 @@ body {
   66%{background-image: url('assets/Adventurer/adventurer-run-04.svg');}
   83% {background-image: url('assets/Adventurer/adventurer-run-05.svg');}
   100%{background-image: url('assets/Adventurer/adventurer-run-00.svg');}
+}
+
+.protagonist-reverse-run{
+  animation: protagonist-reverse-run-animation 0.7s steps(6) infinite;
+  transition: transform 0.9s ease;
+  transform: translate(0,0);
+}
+
+@keyframes protagonist-reverse-run-animation {
+  100% {background-image: url('assets/Adventurer/adventurer-run-00.svg'); }
+  83% {background-image: url('assets/Adventurer/adventurer-run-01.svg'); }
+  66% {background-image: url('assets/Adventurer/adventurer-run-02.svg');}
+  50% {background-image: url('assets/Adventurer/adventurer-run-03.svg');}
+  33%{background-image: url('assets/Adventurer/adventurer-run-04.svg');}
+  16% {background-image: url('assets/Adventurer/adventurer-run-05.svg');}
+  0%{background-image: url('assets/Adventurer/adventurer-run-00.svg');}
 }
 
 .protagonist-attack1{
@@ -1373,7 +1557,7 @@ body {
               background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg');
               transform: translate(-220px, -5px);
               transition: transform 1.6s ease;
-              animation: skeleton-walk-loop-animation 0.8s steps(7) 2;
+              animation: skeleton-walk-loop-animation 0.8s steps(13) infinite;
             }
 
           @keyframes skeleton-walk-loop-animation {
@@ -1390,6 +1574,34 @@ body {
             76.92% { background-image: url('assets/Enemies/Skeleton/skeleton-walk11.svg'); }
             84.62% { background-image: url('assets/Enemies/Skeleton/skeleton-walk12.svg'); }
             92.31% { background-image: url('assets/Enemies/Skeleton/skeleton-walk13.svg'); }
+            100% { background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg'); }
+        }
+
+          .skeleton-reverse-walk-animation{
+            width: 190px;
+              height: 190px;
+              bottom: 50px;
+              margin-bottom: 10vh;
+              background-image: url('assets/Enemies/Kobold/kobold-attack1.svg');
+              transform: translate(0px, 0px);
+              transition: transform 0.8s ease;
+              animation: skeleton-reverse-walk-loop-animation 0.8s steps(13) infinite;
+          }
+
+          @keyframes skeleton-reverse-walk-loop-animation {
+            0% { background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg'); }
+            7.69% { background-image: url('assets/Enemies/Skeleton/skeleton-walk13.svg'); }
+            15.38% { background-image: url('assets/Enemies/Skeleton/skeleton-walk12.svg'); }
+            23.08% { background-image: url('assets/Enemies/Skeleton/skeleton-walk11.svg'); }
+            30.77% { background-image: url('assets/Enemies/Skeleton/skeleton-walk10.svg'); }
+            38.46% { background-image: url('assets/Enemies/Skeleton/skeleton-walk9.svg'); }
+            46.15% { background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg'); }
+            53.85% { background-image: url('assets/Enemies/Skeleton/skeleton-walk7.svg'); }
+            61.54% { background-image: url('assets/Enemies/Skeleton/skeleton-walk6.svg'); }
+            69.23% { background-image: url('assets/Enemies/Skeleton/skeleton-walk5.svg'); }
+            76.92% { background-image: url('assets/Enemies/Skeleton/skeleton-walk4.svg'); }
+            84.62% { background-image: url('assets/Enemies/Skeleton/skeleton-walk3.svg'); }
+            92.31% { background-image: url('assets/Enemies/Skeleton/skeleton-walk2.svg'); }
             100% { background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg'); }
         }
 
@@ -1732,6 +1944,7 @@ body {
 .column {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .bet-row input {
