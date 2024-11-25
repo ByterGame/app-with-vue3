@@ -41,8 +41,7 @@
          [getDeathAnimationClass(chosenEnemyId)]: enemyStatus.dead,
          [getAttackAnimationClass(chosenEnemyId)]: enemyStatus.attack,
          [getRunAnimationClass(chosenEnemyId)]: enemyStatus.run,
-         'filter': enemyStatus.attacked || enemyStatus.dead,}"
-         style=" margin-bottom: 100px;">
+         'filter': enemyStatus.attacked || enemyStatus.dead,}">
     </div>
 
   </div>
@@ -163,7 +162,8 @@ export default {
   },
 
   updated() {
-    this.updateData();
+    if (this.userLoggedIn)
+      this.updateData();
   },
 
   computed: {
@@ -945,7 +945,7 @@ body {
 
 .protagonist-attack1{
   animation: protagonist-attack1-animation 1.5s steps(11) infinite;
-  transform: translate(220px,0);
+  transform: translate(200px,0);
 }
 
 @keyframes protagonist-attack1-animation {
@@ -965,7 +965,7 @@ body {
 
 .protagonist-attack3{
   animation: protagonist-attack3-animation 0.7s steps(6) infinite;
-  transform: translate(220px,0);
+  transform: translate(200px,0);
 }
 
 @keyframes protagonist-attack3-animation {
@@ -1008,7 +1008,7 @@ body {
             bottom: 50px;
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin-death8.svg');
-            transform: translate(25px, -20px);
+            transform: translate(-15px, -20px);
             animation: goblin-death-loop-animation 1.2s steps(9) 1;
           }
 
@@ -1027,6 +1027,7 @@ body {
             width: 300px;
             height: 300px;
             bottom: 50px;
+            transform: translate(-40px,10px);
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin1.svg');
             animation: goblin_static-loop-animation 1.1s steps(7) infinite;
@@ -1046,6 +1047,7 @@ body {
             width: 300px;
             height: 300px;
             bottom: 50px;
+            transform: translate(-40px,10px);
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse1.svg');
             animation: goblin_reverse-loop-animation 1.5s steps(13) infinite;
@@ -1071,6 +1073,7 @@ body {
             width: 300px;
             height: 300px;
             bottom: 50px;
+            transform: translate(-40px,10px);
             margin-bottom: 100px;
             background-image: url('assets/Enemies/Goblin/goblin_animation/goblin_reverse_static1.svg');
             animation: goblin_reverse_static-loop-animation 1.1s steps(7) infinite;
@@ -1420,7 +1423,6 @@ body {
               width: 240px;
               height: 240px;
               margin-bottom: 100px;
-              margin-bottom: 150px;
               transform: translate(-250px,-30px);
               background-image: url('assets/Enemies/Skeleton/skeleton-reverse1.svg');
               animation: skeleton-reverse-loop-animation 1.8s steps(7) infinite;
@@ -1608,7 +1610,7 @@ body {
             width: 70px;
             height: 70px;
             position: absolute;
-            margin-bottom: 90px;
+            margin-bottom: 20px;
             left: 52%;
             bottom: 50px;
             background-image: url('assets/Enemies/Fire/fire1.svg');
