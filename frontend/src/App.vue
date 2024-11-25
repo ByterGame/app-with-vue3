@@ -3,19 +3,19 @@
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
   <ResultTable v-if="this.showRatingTable"/>
-  <div class="clicker-section">
-    <div class="balance"><div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
 
-    <div class="balance"><div class="little-button" @click="showRatingTrue"><a>Rating</a></div>
-    <div class="little-button"><a>League {{chosenLeague}}</a></div>
-    <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div></div>
-    <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
-      <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
-    </div>
-    <div class="container">
-      <div class="button" @click="addMoney"><a>Click Me!</a></div>
-    </div>
+  <div class="clicker-section">
+  <div class="balance">
+    <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
+    <div class="little-button" @click="showRatingTrue"><a>Balance: $ {{ balance.toFixed(0) }}</a></div>
   </div>
+  <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
+    <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
+  </div>
+  <div class="container">
+    <div class="button" @click="addMoney"><a>Click Me!</a></div>
+  </div>
+</div>
   <div class="animation-section">
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy" :class="{'disabled': fightIsOn}"
@@ -143,6 +143,7 @@ export default {
       chosenLeague: 1,
       winRate: 0,
       winOdd: 1,
+      save: 0,
       winner: 'Who will win?',
       protagonistStatus: {
         dead: false,
@@ -182,6 +183,7 @@ export default {
       }
     }
   },
+
   watch:{
     userLoggedIn (oldValue, newValue) {
       if(newValue === false) {
@@ -191,15 +193,17 @@ export default {
       }
     }
   },
+
   mounted() {
     this.calculateWinRate();
     this.calculateWinOdd();
     window.addEventListener('keydown', this.handleKeyDown);
-
   },
+
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
   },
+
   updated() {
     this.save++;
     if (this.userLoggedIn && this.save >= 3) {
@@ -300,11 +304,14 @@ export default {
         this.closeModals();
       }
     },
+
     protagonistRun(){
+      console.log("Run started");
       return new Promise((resolve) => {
         this.protagonistStatus.run = true;
         setTimeout(() => {
           this.protagonistStatus.run = false;
+          console.log("Run ended");
           resolve();
         }, 500 * 2);
       });
@@ -454,6 +461,7 @@ export default {
         }, 700 * 2);
       });
     },
+
     enemyBomb(){
       return new Promise((resolve) => {
         this.enemyStatus.normal = false;
@@ -468,8 +476,9 @@ export default {
 
     enemyAttack() {
       if(this.chosenEnemyId === 4 || this.chosenEnemyId === 6){
-        if(this.lastPunch === 2){
-          this.lastPunch = 2;
+        if(this.nextPunch === 2){
+          if(this.lastPunch === 2){
+            this.lastPunch = 2;
           return new Promise((resolve) => {
             this.enemyStatus.normal = false;
             this.enemyStatus.attack = true;
@@ -482,29 +491,9 @@ export default {
             }, 800 * 2);
           });
         }
-        if(this.nextPunch === 1){
-          return this.enemyRun().then(() => {
-          this.lastPunch = 2;
-          return new Promise((resolve) => {
-            this.enemyStatus.normal = false;
-            this.protagonistStatus.attacked = true;
-            this.enemyStatus.attack = true;
-            setTimeout(() => {
-              this.enemyStatus.attack = false;
-              this.protagonistStatus.attacked = false;
-              this.enemyStatus.reverseRun = true;
-              setTimeout(() => {
-                this.enemyStatus.reverseRun = false;
-                this.enemyStatus.normal = true;
-                resolve();
-                }, 800);
-            }, 800 * 2);
-          });
-        });
-        }
       return this.enemyRun().then(() => {
-        this.lastPunch = 2;
         return new Promise((resolve) => {
+          this.lastPunch = 2;
           this.enemyStatus.normal = false;
           this.protagonistStatus.attacked = true;
           this.enemyStatus.attack = true;
@@ -521,6 +510,45 @@ export default {
             }, 800 * 2);
         });
       });
+        }
+          else {
+          if (this.lastPunch === 2) {
+            return new Promise((resolve) => {
+              this.lastPunch = 2;
+              this.enemyStatus.normal = false;
+              this.enemyStatus.attack = true;
+              this.protagonistStatus.attacked = true;
+              setTimeout(() => {
+                this.enemyStatus.attack = false;
+                this.protagonistStatus.attacked = false;
+                this.enemyStatus.reverseRun = true;
+                setTimeout(() => {
+                  this.enemyStatus.reverseRun = false;
+                  this.enemyStatus.normal = true;
+                  resolve();
+                }, 800);
+              }, 800 * 2);
+            });
+          }
+          return this.enemyRun().then(() => {
+          return new Promise((resolve) => {
+            this.lastPunch = 2;
+            this.enemyStatus.normal = false;
+            this.protagonistStatus.attacked = true;
+            this.enemyStatus.attack = true;
+            setTimeout(() => {
+              this.enemyStatus.attack = false;
+              this.protagonistStatus.attacked = false;
+              this.enemyStatus.reverseRun = true;
+              setTimeout(() => {
+                this.enemyStatus.reverseRun = false;
+                this.enemyStatus.normal = true;
+                resolve();
+                }, 800);
+            }, 800 * 2);
+          });
+        });
+      }
       }
       if(this.chosenEnemyId === 1 || this.chosenEnemyId === 3 || this.chosenEnemyId === 5){
           return this.enemyBomb().then(() => {
@@ -620,6 +648,7 @@ export default {
           this.winner = 'YOU LOSE';
         }
         this.bet = 10;
+        this.lastPunch = 0;
     },
     getBombAnimationClass(enemyId) {
       switch (enemyId) {
@@ -1584,7 +1613,7 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
-              background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg');
+              background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg');
               transform: translate(-220px, -5px);
               transition: transform 1.6s ease;
               animation: skeleton-walk-loop-animation 0.8s steps(13) infinite;
@@ -1612,7 +1641,7 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
-              background-image: url('assets/Enemies/Kobold/kobold-attack1.svg');
+              background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg');
               transform: translate(0px, 0px);
               transition: transform 0.8s ease;
               animation: skeleton-reverse-walk-loop-animation 0.8s steps(13) infinite;
