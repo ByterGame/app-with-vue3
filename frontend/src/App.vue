@@ -4,11 +4,10 @@
   <div v-if="!userLoggedIn" class="overlay"></div>
   <ResultTable v-if="this.showRatingTable"/>
   <div class="clicker-section">
-    <div class="balance"><div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
-
     <div class="balance"><div class="little-button" @click="showRatingTrue"><a>Rating</a></div>
-    <div class="little-button"><a>League {{chosenLeague}}</a></div>
-    <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div></div>
+      <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
+      <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div>
+    </div>
     <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
       <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
     </div>
@@ -19,7 +18,7 @@
   <div class="animation-section">
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy" :class="{'disabled': fightIsOn}"
-  :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Choose Enemy</a></div>
+          :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Choose Enemy</a></div>
         <div class="bet-row">
             <span>Win Rate: {{(winRate * 100).toFixed(1)}}%</span>
           <div class="column">
@@ -29,8 +28,8 @@
           <span>Win Odds: {{winOdd.toFixed(1)}}</span>
         </div>
         <div class="little-button" @click="makeBet" :class="{'disabled': fightIsOn}"
-  :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Start Fight</a></div>
-    </div>
+          :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Start Fight</a></div>
+        </div>
     <div class="Result" style="font-size: 42px;">{{winner}}</div>
   <div class="fight-row">
     <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead,
@@ -123,6 +122,7 @@
 
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
+import MiniGame from "@/components/MiniGame.vue";
 import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
@@ -827,7 +827,8 @@ export default {
 
   components: {
     ResultTable,
-    RegistrationModal
+    RegistrationModal,
+    MiniGame
   },
 }
 
