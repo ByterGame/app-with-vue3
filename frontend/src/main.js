@@ -4,16 +4,23 @@ import App from './App.vue'
 
 const store = createStore({
   state: {
-    username: ''
+    username: '',
+    showRatingTable: false,
   },
   mutations: {
     setUsername(state, username) {
       state.username = username;
+    },
+    setShowRatingTable(state, showRatingTable) {
+      state.showRatingTable = showRatingTable;
     }
   },
   actions: {
     updateUsername({ commit }, username) {
       commit('setUsername', username);
+    },
+    updateShowRatingTable({commit}, showRatingTable) {
+      commit('setShowRatingTable', showRatingTable);
     }
   }
 });

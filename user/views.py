@@ -1,3 +1,5 @@
+from pydoc import describe
+
 from django.http import JsonResponse
 from rest_framework import generics, permissions
 from rest_framework.response import Response
@@ -103,3 +105,26 @@ def updateData(request):
             update_user = serializer.save()
             return JsonResponse(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+api_view(['GET'])
+def getStats(request):
+    if request.method == 'GET':
+        username = request.GET.get('username', None)
+        try:
+            users =  User.objects.all().order_by('-maximumMoney')
+            user = User.objects.get(username=username)
+            user_position = list(users).index(user) + 1
+            top_users = users[:10]
+            user_data = [
+                {"index": i + 1, "username": u.username, "maximumMoney": u.maximumMoney}
+                for i, u in enumerate(top_users)
+            ]
+            if user_position > 10:
+                user_data.append({"index": user_position, "username": user.username, "maximumMoney": user.maximumMoney})
+
+            data = {"user_data" : user_data}
+
+            return JsonResponse(data)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)

@@ -10,15 +10,18 @@ export const authService = {
         return axios.post(`${apiUrl}login/`, userData);
     },
     // updateMoney(userData) {
-    //     return axios.post(`${apiUrl}updateMoney/`, userData)
+    //     return axios.post(`${apiUrl}updateMoney/`, userData);
     // },
     // updateHero(userData) {
-    //     return axios.post(`${apiUrl}updateHero/`, userData)
+    //     return axios.post(`${apiUrl}updateHero/`, userData);
     // },
     getData(username) {
-        return axios.get(`${apiUrl}getData/`, {params : {username : username}})
+        return axios.get(`${apiUrl}getData/`, {params : {username : username}});
     },
     updateData(userData) {
         return axios.post(`${apiUrl}updateData/`, userData);
     },
+    getUsersStats(username){
+        return axios.get(`${apiUrl}getStats/`, {params : {username : username}});
+    }
 };

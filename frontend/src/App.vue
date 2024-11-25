@@ -2,8 +2,12 @@
   <RegistrationModal :userLoggedIn="userLoggedIn"
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
+  <ResultTable v-if="this.showRatingTable"/>
   <div class="clicker-section">
     <div class="balance"><div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
+
+    <div class="balance"><div class="little-button" @click="showRatingTrue"><a>Rating</a></div>
+    <div class="little-button"><a>League {{chosenLeague}}</a></div>
     <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div></div>
     <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
       <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
@@ -119,6 +123,7 @@
 
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
+import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
 export default {
@@ -181,8 +186,8 @@ export default {
     userLoggedIn (oldValue, newValue) {
       if(newValue === false) {
         this.getData();
-        this.calculateWinRate();
-        this.calculateWinOdd();
+        setTimeout(this.calculateWinRate, 150);
+        setTimeout(this.calculateWinOdd, 150);
       }
     }
   },
@@ -196,8 +201,11 @@ export default {
     window.removeEventListener('keydown', this.handleKeyDown);
   },
   updated() {
-    if (this.userLoggedIn)
+    this.save++;
+    if (this.userLoggedIn && this.save >= 3) {
       this.updateData();
+      this.save = 0;
+    }
   },
 
   computed: {
@@ -206,6 +214,9 @@ export default {
     },
     usernameFromStore() {
       return this.$store.state.username;
+    },
+    showRatingTable() {
+      return this.$store.state.showRatingTable;
     }
   },
 
@@ -256,7 +267,7 @@ export default {
     async getData() {
       try {
         const response = await authService.getData(this.usernameFromStore);
-        console.log(response);
+        // console.log(response);
         this.balance = response.data['money'];
         this.maximumBalance = response.data['maximumMoney'];
         this.character['speed'] = response.data['heroSpeed'];
@@ -742,6 +753,12 @@ export default {
       this.userLoggedIn = value;
     },
 
+    showRatingTrue() {
+      this.$store.dispatch('updateShowRatingTable', true);
+      console.log(this.showRatingTable)
+      console.log(this.$store.state.showRatingTable)
+    },
+
     upgrade(characteristic) {
       const sum = this.character[characteristic] * this.priceList[characteristic];
       if (this.balance >= sum) {
@@ -809,6 +826,7 @@ export default {
   },
 
   components: {
+    ResultTable,
     RegistrationModal
   },
 }
