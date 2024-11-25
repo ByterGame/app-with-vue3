@@ -27,8 +27,8 @@
         <div class="little-button" @click="makeBet" :class="{'disabled': fightIsOn}"
   :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Start Fight</a></div>
     </div>
+    <div class="Result" style="font-size: 42px;">{{winner}}</div>
   <div class="fight-row">
-
     <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead,
     'protagonist-run': protagonistStatus.run,
     'protagonist-attack1': protagonistStatus.attack1,
@@ -62,7 +62,7 @@
               <span class="enemy-text">Durability: {{ enemy.durability }}</span>
           </p>
         </div>
-        <div class="super-little-button" @click="changeEnemy(enemy.id)"  style="position: relative; left: 50%; transform: translate(-50%, 0); "><a>Select</a></div>
+        <div class="super-little-button" @click="changeEnemy(enemy.id)" style="position: relative; left: 50%; transform: translate(-50%, 0); "><a>Select</a></div>
       </div>
 </div>
 
@@ -111,6 +111,7 @@ export default {
       chosenLeague: 1,
       winRate: 0,
       winOdd: 1,
+      winner: 'Who will win?',
       protagonistStatus: {
         dead: false,
         attack1: false,
@@ -159,8 +160,12 @@ export default {
   mounted() {
     this.calculateWinRate();
     this.calculateWinOdd();
-  },
+    window.addEventListener('keydown', this.handleKeyDown);
 
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+  },
   updated() {
     if (this.userLoggedIn)
       this.updateData();
@@ -245,7 +250,11 @@ export default {
       this.isEnemyModalVisible = false;
       this.isUpgradeModalVisible = false;
     },
-
+    handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        this.closeModals();
+      }
+    },
     protagonistRun(){
       return new Promise((resolve) => {
         this.protagonistStatus.run = true;
@@ -376,11 +385,7 @@ export default {
       });
       }
       if(this.chosenEnemyId === 1 || this.chosenEnemyId === 3 || this.chosenEnemyId === 5){
-        if(this.lastPunch === 2){
-        this.lastPunch = 2;
-      }
       return this.enemyBomb().then(() => {
-        this.lastPunch = 2;
         return new Promise((resolve) => {
           this.enemyStatus.normal = true;
           this.enemyStatus.attack = false;
@@ -456,9 +461,11 @@ export default {
           await this.protagonistAttack1();
           await this.enemyDead();
           this.balance += this.bet * this.winOdd;
+          this.winner = 'YOU WIN';
         } else {
           await this.enemyAttack();
           await this.protagonistDead();
+          this.winner = 'YOU LOSE';
         }
         this.bet = 10;
     },
@@ -626,6 +633,7 @@ export default {
     changeEnemy(id) {
       this.chosenEnemyId = id;
       this.calculateWinRate();
+      this.isEnemyModalVisible = false;
     },
   },
   components: {
@@ -657,7 +665,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 40%;
+  height: 38%;
   align-content: center;
   justify-content: space-between;
 }
@@ -1141,8 +1149,8 @@ body {
             margin-bottom: 10vh;
             background-image: url('assets/Enemies/Dead/dead_animation/dead-reverse1.svg');
             transform: translate(-220px, 0px);
-            transition: transform 1.2s ease;
-            animation: dead-reverse-loop-animation 1.2s steps(9) infinite;
+            transition: transform 1.6s ease;
+            animation: dead-reverse-loop-animation 1.6s steps(9) infinite;
           }
 
           @keyframes dead-reverse-loop-animation {
@@ -1425,7 +1433,7 @@ body {
               margin-bottom: 10vh;
               transform: translate(-250px,-30px);
               background-image: url('assets/Enemies/Skeleton/skeleton-reverse1.svg');
-              animation: skeleton-reverse-loop-animation 1.8s steps(7) infinite;
+              animation: skeleton-reverse-loop-animation 1.6s steps(7) infinite;
             }
 
           @keyframes skeleton-reverse-loop-animation {
@@ -1494,8 +1502,8 @@ body {
               margin-bottom: 10vh;
               background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
               transform: translate(-220px, 10px);
-              transition: transform 1.4s ease;
-              animation: kobold-run-animation-loop 0.5s steps(7) infinite;
+              transition: transform 1.5s ease;
+              animation: kobold-run-animation-loop 1.5s steps(7) infinite;
             }
 
           @keyframes kobold-run-animation-loop {
@@ -1539,7 +1547,7 @@ body {
               margin-bottom: 10vh;
               transform: translate(-220px, 10px);
               background-image: url('assets/Enemies/Kobold/kobold-attack-reverse1.svg');
-              animation: kobold-reverse-animation-loop-animation 0.6s steps(7) infinite;
+              animation: kobold-reverse-animation-loop-animation 0.97s steps(7) infinite;
             }
 
           @keyframes kobold-reverse-animation-loop-animation {
