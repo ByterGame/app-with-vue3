@@ -125,7 +125,6 @@ export default {
 .little-button a {
   color: #d6c6dd;
   font-family: 'Press Start 2P', sans-serif;
-  //font-weight:bold;
   font-size: 14px;
   text-align: center;
   text-decoration: none;
