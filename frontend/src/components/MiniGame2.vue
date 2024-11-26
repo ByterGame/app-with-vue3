@@ -1,25 +1,30 @@
 <script>
-
 export default {
-  data() {
-    return {
-      gameStarted: false,
-      gameCountdownVisible: false,
-      countdown: 3,
-      timeLeft: 30,
-      clickCount: 0,
-      gameEnded: false,
-      resultMessage: ''
-    }
+    data() {
+        return {
+            gameStarted: false,
+            gameCountdownVisible: false,
+            countdown: 3,
+            timeLeft:   7,
+            sequence: [1, 2, 3, 4, 5],
+            shuffledSequence: [],
+            userClicks: [],
+            currentIndex: 0,
+            gameEnded: false,
+            resultMessage: ''
+        }
     },
     methods: {
         startGame() {
             this.gameStarted = false;
             this.gameEnded = false;
-            this.clickCount = 0;
-            this.timeLeft = 30;
+            this.userClicks = [];
+            this.currentIndex = 0;
+            this.timeLeft = 7;
             this.countdown = 3;
             this.gameCountdownVisible = true;
+
+            this.shuffledSequence = this.shuffleArray([...this.sequence]);
 
             const countdownInterval = setInterval(() => {
                 if (this.countdown > 0) {
@@ -38,33 +43,44 @@ export default {
                     this.timeLeft--;
                 } else {
                     clearInterval(timerInterval);
-                    this.endGame();
+                    this.endGame(false);
                 }
             }, 1000);
         },
-
-        registerClick() {
-            this.clickCount++;
-            if(this.clickCount >= 100)
-              this.endGame();
+        shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         },
+        registerClick(number) {
+            if (this.gameEnded) return;
 
-        endGame() {
+            if (number === this.sequence[this.currentIndex]) {
+                this.userClicks.push(number);
+                this.currentIndex++;
+
+                if (this.currentIndex === this.sequence.length) {
+                    this.endGame(true);
+                }
+            } else {
+                this.endGame(false);
+            }
+        },
+        endGame(success) {
             this.gameStarted = false;
             this.gameEnded = true;
-            let result = false;
-            if (this.clickCount >= 100) {
-              result = true;
-              this.resultMessage = "Поздравляем! Вы набрали " + this.clickCount + " кликов!";
+            if (success) {
+                this.resultMessage = "Congratulations! You completed the sequence!";
             } else {
-              result = false;
-              this.resultMessage = "Вот и все! Вы набрали только " + this.clickCount + " кликов.";
+                this.resultMessage = "Wrong sequence! Game over!";
             }
-            this.$emit('game-finished', result);
+            this.$emit('game-finished', success);
         },
-      showMiniGameFalse(){
-          this.$emit('close', true);
-      }
+        showMiniGameFalse() {
+            this.$emit('close', true);
+        }
     }
 }
 </script>
@@ -72,27 +88,30 @@ export default {
 <template>
   <div class="modal">
     <div v-if="!gameStarted && !gameEnded">
-            <div class="rules-content">
-                <h2>Правила игры</h2>
-                <p>Нажмите на кнопку более 100 раз за 30 секунд!</p>
-                <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Старт</a></div>
-            </div>
+        <div class="rules-content">
+            <h2>Game rules</h2>
+            <p>Click the numbers 1 to 5 in the correct order!</p>
+            <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Start</a></div>
+        </div>
+    </div>
+
+    <div v-if="!gameStarted && gameCountdownVisible">
+        <h1 id="countdown-number">{{ countdown }}</h1>
+    </div>
+
+    <div v-if="gameStarted" id="game">
+        <h2>Time: <span>{{ timeLeft }}</span> </h2>
+        <div class="number-buttons">
+            <div class="little-button" v-for="num in shuffledSequence" :key="num" @click="registerClick(num)"><a>{{ num }}</a></div>
         </div>
 
-        <div v-if="!gameStarted && gameCountdownVisible">
-            <h1 id="countdown-number">{{ countdown }}/100</h1>
-        </div>
-
-        <div v-if="gameStarted" id="game">
-            <h2>Время: <span>{{ timeLeft }}</span> секунд</h2>
-            <h2>Клики: <span>{{ clickCount }}</span></h2>
-            <div class="little-button" @click="registerClick"><a>Нажми меня!</a></div>
-        </div>
+    </div>
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
   </div>
   <div class="overlay"></div>
 </template>
+
 
 <style scoped>
 .little-button {
