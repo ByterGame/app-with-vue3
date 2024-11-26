@@ -5,13 +5,34 @@ export default {
       gameStarted: false,
       gameCountdownVisible: false,
       countdown: 3,
-      timeLeft: 30,
+      timeLeft: 40,
       clickCount: 0,
       gameEnded: false,
-      resultMessage: ''
+      resultMessage: '',
+      randomX: 0,
+      randomY: 0,
+      enemyImage: 'goblin',
     }
     },
     methods: {
+    getAnimationClass(enemyId) {
+      switch (enemyId) {
+        case 1:
+          return 'goblin';
+        case 3:
+          return 'flying-eye';
+        case 2:
+          return 'dead';
+        case 4:
+          return 'skeleton';
+        case 5:
+          return 'demon';
+        case 6:
+          return 'kobold';
+        default:
+          return 'goblin';
+      }
+    },
         startGame() {
             this.gameStarted = false;
             this.gameEnded = false;
@@ -19,22 +40,28 @@ export default {
             this.timeLeft = 30;
             this.countdown = 3;
             this.gameCountdownVisible = true;
-
             const countdownInterval = setInterval(() => {
                 if (this.countdown > 0) {
                     this.countdown--;
                 } else {
+                  this.enemyImage = this.getAnimationClass(Math.floor((Math.random() * 6)));
+                  this.randomY = Math.floor((Math.random() * 390)) + 80;
+                  this.randomX = Math.floor((Math.random() * 340)) + 40;
                     clearInterval(countdownInterval);
                     this.gameCountdownVisible = false;
                     this.startTimer();
+                    this.generatePoints();
                 }
             }, 1000);
         },
+
         startTimer() {
             this.gameStarted = true;
             const timerInterval = setInterval(() => {
                 if (this.timeLeft > 0) {
                     this.timeLeft--;
+                    // this.randomX = Math.floor((Math.random() * 400));
+                    // this.randomY = Math.floor((Math.random() * 400));
                 } else {
                     clearInterval(timerInterval);
                     this.endGame();
@@ -42,22 +69,32 @@ export default {
             }, 1000);
         },
 
+      generatePoints() {
+          const pointTimerInterval = setInterval(() => {
+            this.enemyImage = this.getAnimationClass(Math.floor((Math.random() * 6)));
+            this.randomY = Math.floor((Math.random() * 390)) + 80;
+            this.randomX = Math.floor((Math.random() * 340)) + 40;
+            }, 1500);
+      },
+
         registerClick() {
-            this.clickCount++;
-            if(this.clickCount >= 100)
-              this.endGame();
+          this.clickCount++;
+          // this.randomX = Math.floor((Math.random() * 1000) % 400);
+          // this.randomY = Math.floor((Math.random() * 1000) % 400);
+          if(this.clickCount >= 10)
+            this.endGame();
         },
 
         endGame() {
             this.gameStarted = false;
             this.gameEnded = true;
             let result = false;
-            if (this.clickCount >= 100) {
+            if (this.clickCount >= 10) {
               result = true;
-              this.resultMessage = "Поздравляем! Вы набрали " + this.clickCount + " кликов!";
+              this.resultMessage = "Congratulations! You reached " + this.clickCount + " clicks!";
             } else {
               result = false;
-              this.resultMessage = "Вот и все! Вы набрали только " + this.clickCount + " кликов.";
+              this.resultMessage = "Unfortunately! You got only " + this.clickCount + " clicks.";
             }
             this.$emit('game-finished', result);
         },
@@ -73,7 +110,7 @@ export default {
     <div v-if="!gameStarted && !gameEnded">
             <div class="rules-content">
                 <h2>Game rules</h2>
-                <p>Catch 30 points in 50 seconds by tapping on them</p>
+                <p>Catch 10 points in 40 seconds by tapping on them</p>
                 <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Start</a></div>
             </div>
         </div>
@@ -82,10 +119,12 @@ export default {
             <h1 id="countdown-number">{{ countdown }}</h1>
         </div>
 
-        <div v-if="gameStarted" id="game">
-            <h2>Время: <span>{{ timeLeft }}</span> секунд</h2>
-            <h2>Клики: <span>{{ clickCount }}</span></h2>
-            <div class="little-button" @click="registerClick"><a>Нажми меня!</a></div>
+        <div v-if="gameStarted" id="game" style="height: 400px;">
+            <h2>Time left: <span>{{ timeLeft }}</span> sec</h2>
+            <h2>Points: <span>{{ clickCount }}/10</span></h2>
+            <div :class="enemyImage"
+                :style="{position: 'absolute', top: randomX + 'px', left: randomY + 'px'}"
+                @click="registerClick"></div>
         </div>
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
@@ -261,6 +300,7 @@ export default {
   background: rgba(0, 0, 0, 0.5);
   z-index: 5;
 }
+
 input {
   width: 80%;
   padding: 15px;
@@ -275,5 +315,54 @@ input {
   -moz-border-radius: 5px;
   border-radius: 5px;
 }
+
+.goblin {
+  background-repeat: no-repeat;
+  background-size: contain;
+            width: 60px;
+            height: 60px;
+            background-image: url('../assets/Enemies/Goblin/goblin_animation/goblin1.svg');
+          }
+
+.dead {
+  background-repeat: no-repeat;
+  background-size: contain;
+            width: 60px;
+            height: 60px;
+            background-image: url('../assets/Enemies/Dead/dead_animation/dead1.svg');
+          }
+
+.demon {
+  background-repeat: no-repeat;
+  background-size: contain;
+            width: 60px;
+            height: 60px;
+            background-image: url('../assets/Enemies/Demon/demon1.svg');
+          }
+
+.flying-eye {
+  background-repeat: no-repeat;
+  background-size: contain;
+            width: 60px;
+            height: 60px;
+            background-image: url('../assets/Enemies/Flying eye/eye1.svg');
+          }
+
+.skeleton {
+  background-repeat: no-repeat;
+  background-size: contain;
+              width: 60px;
+              height: 60px;
+              background-image: url('../assets/Enemies/Skeleton/skeleton_new1.svg');
+            }
+
+.kobold {
+  background-repeat: no-repeat;
+  background-size: contain;
+              width: 60px;
+              height: 60px;
+              background-image: url('../assets/Enemies/Kobold/kobold-attack1.svg');
+            }
+
 
 </style>

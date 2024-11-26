@@ -5,6 +5,7 @@
   <ResultTable v-if="this.showRatingTable"/>
   <MiniGame v-if="miniGameActive" @game-finished="evaluateGame" @close="closeMiniGame"/>
   <MiniGame2 v-if="miniGame2Active" @game-finished="evaluateGame2" @close="closeMiniGame"/>
+  <MiniGame3 v-if="miniGame3Active" @game-finished="evaluateGame3" @close="closeMiniGame"/>
   <div class="clicker-section">
   <div class="balance">
     <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
@@ -84,13 +85,13 @@
         </div>
       </div>
       <p>Strength: {{ character.strength }} </p>
-      <div class="super-little-button">
-        <div class="row"><a @click="upgrade('strength')">Upgrade</a>
+      <div class="super-little-button" @click="upgrade('strength')">
+        <div class="row"><a>Upgrade</a>
           <p>{{ character.strength * priceList.strength }}$</p></div>
       </div>
       <p>Durability: {{ character.durability }} </p>
-      <div class="super-little-button">
-        <div class="row"><a @click="upgrade('durability')">Upgrade</a>
+      <div class="super-little-button" @click="upgrade('durability')">
+        <div class="row"><a>Upgrade</a>
           <p>{{ character.durability * priceList.durability }}$</p></div>
       </div>
     </div>
@@ -126,6 +127,7 @@
 import RegistrationModal from "@/components/RegistrationModal.vue";
 import MiniGame from "@/components/MiniGame.vue";
 import MiniGame2 from "@/components/MiniGame2.vue";
+import MiniGame3 from "@/components/MiniGame3.vue";
 import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
@@ -142,6 +144,7 @@ export default {
       isLeagueModalVisible: false,
       miniGameActive: false,
       miniGame2Active: false,
+      miniGame3Active: false,
       fightIsOn: false,
       lastPunch: 0,
       nextPunch: 0,
@@ -307,6 +310,7 @@ export default {
       this.isUpgradeModalVisible = false;
       this.isLeagueModalVisible = false;
     },
+
     handleKeyDown(event) {
       if (event.key === 'Escape') {
         this.closeModals();
@@ -800,8 +804,10 @@ export default {
             this.miniGameActive = true;
           else if(characteristic === "strength")
             this.miniGame2Active = true;
+          else if(characteristic === "speed")
+            this.miniGame3Active = true;
           else
-            this.miniGame2Active = true;
+            this.miniGame1Active = true;
         }
       },
       // try {
@@ -835,11 +841,19 @@ export default {
       }
     },
 
-
+    evaluateGame3(result) {
+      if(result === true){
+        this.character.speed++;
+      this.calculateWinRate();
+      this.updateData();
+      }
+    },
 
     closeMiniGame() {
       this.miniGameActive = false;
       this.miniGame2Active = false;
+      this.miniGame3Active = false;
+      this.isUpgradeModalVisible = true;
     },
 
     calculateWinRate() {
@@ -876,9 +890,9 @@ export default {
 
     loadEnemiesCharacteristics() {
       for(const enemy of this.enemies){
-        enemy.speed = enemy.speed + 5*this.chosenLeague;
-        enemy.strength = enemy.strength + 5*this.chosenLeague;
-        enemy.durability = enemy.durability + 5*this.chosenLeague;
+        enemy.speed = enemy.speed + 5 * this.chosenLeague;
+        enemy.strength = enemy.strength + 5 * this.chosenLeague;
+        enemy.durability = enemy.durability + 5 * this.chosenLeague;
       }
     },
 
@@ -900,6 +914,7 @@ export default {
     RegistrationModal,
     MiniGame,
     MiniGame2,
+    MiniGame3,
   },
 }
 
@@ -1600,7 +1615,8 @@ body {
             75% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat1.svg'); transform: translate(0, 5%);}
             100% { background-image: url('assets/Enemies/Flying eye/eye-reverse-stat2.svg'); transform: translate(0, 0%);}
           }
-             .flying-eye-reverse-static-animation {
+
+          .flying-eye-reverse-static-animation {
             width: 200px;
             height: 200px;
             bottom: 50px;
