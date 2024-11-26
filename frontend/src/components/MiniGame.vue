@@ -48,12 +48,19 @@ export default {
         endGame() {
             this.gameStarted = false;
             this.gameEnded = true;
+            let result = false;
             if (this.clickCount > 100) {
-                this.resultMessage = "Поздравляем! Вы набрали " + this.clickCount + " кликов!";
+              result = true;
+              this.resultMessage = "Поздравляем! Вы набрали " + this.clickCount + " кликов!";
             } else {
-                this.resultMessage = "Вот и все! Вы набрали только " + this.clickCount + " кликов.";
+              result = false;
+              this.resultMessage = "Вот и все! Вы набрали только " + this.clickCount + " кликов.";
             }
-        }
+            this.$emit('game-finished', result);
+        },
+      showMiniGameFalse(){
+          this.$emit('close', true);
+      }
     }
 }
 </script>
@@ -77,8 +84,9 @@ export default {
             <h2>Клики: <span>{{ clickCount }}</span></h2>
             <div class="little-button" @click="registerClick"><a>Нажми меня!</a></div>
         </div>
-    <h2 v-if="gameEnded">{{ resultMessage }}</h2>
+    <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
   </div>
+  <div class="overlay"></div>
 </template>
 
 <style scoped>
@@ -237,6 +245,17 @@ export default {
 
 .modal-content button {
   font-family: 'Press Start 2P', sans-serif;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 5;
 }
 
 </style>

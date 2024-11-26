@@ -3,7 +3,7 @@
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
   <ResultTable v-if="this.showRatingTable"/>
-  <MiniGame v-if="miniGameActive"/>
+  <MiniGame v-if="miniGameActive" @game-finished="evaluateGame" @close="closeMiniGame"/>
   <div class="clicker-section">
   <div class="balance">
     <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
@@ -792,10 +792,9 @@ export default {
       const sum = this.character[characteristic] * this.priceList[characteristic];
       if (this.balance >= sum) {
         this.balance -= sum;
-        this.character[characteristic]++;
+        this.closeModals();
+        this.miniGameActive = true;
       }
-      this.calculateWinRate();
-      this.updateData();
       // try {
       //   const response = await authService.updateHero({
       //     username: this.usernameFromStore,
@@ -809,6 +808,18 @@ export default {
       // } catch (error) {
       //   console.error(error)
       // }
+    },
+
+    evaluateGame(result) {
+      if(result === true){
+        this.character.speed++;
+      this.calculateWinRate();
+      this.updateData();
+      }
+    },
+
+    closeMiniGame() {
+      this.miniGameActive = false;
     },
 
     calculateWinRate() {
