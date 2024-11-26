@@ -45,8 +45,8 @@ export default {
                     this.countdown--;
                 } else {
                   this.enemyImage = this.getAnimationClass(Math.floor((Math.random() * 6)));
-                  this.randomY = Math.floor((Math.random() * 390)) + 80;
-                  this.randomX = Math.floor((Math.random() * 340)) + 40;
+                  this.randomX = Math.floor((Math.random() * 390)) + 80;
+                  this.randomY = Math.floor((Math.random() * 290)) + 80;
                     clearInterval(countdownInterval);
                     this.gameCountdownVisible = false;
                     this.startTimer();
@@ -72,8 +72,8 @@ export default {
       generatePoints() {
           const pointTimerInterval = setInterval(() => {
             this.enemyImage = this.getAnimationClass(Math.floor((Math.random() * 6)));
-            this.randomY = Math.floor((Math.random() * 390)) + 80;
-            this.randomX = Math.floor((Math.random() * 340)) + 40;
+            this.randomX = Math.floor((Math.random() * 390)) + 80;
+            this.randomY = Math.floor((Math.random() * 290)) + 80;
             }, 1500);
       },
 
@@ -123,7 +123,7 @@ export default {
             <h2>Time left: <span>{{ timeLeft }}</span> sec</h2>
             <h2>Points: <span>{{ clickCount }}/10</span></h2>
             <div :class="enemyImage"
-                :style="{position: 'absolute', top: randomX + 'px', left: randomY + 'px'}"
+                :style="{position: 'absolute', top: randomY + 'px', left: randomX + 'px'}"
                 @click="registerClick"></div>
         </div>
 

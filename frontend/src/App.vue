@@ -33,7 +33,7 @@
         <div class="little-button" @click="makeBet" :class="{'disabled': fightIsOn}"
           :style="{ pointerEvents: fightIsOn ? 'none' : 'auto' }"><a>Start Fight</a></div>
         </div>
-    <div class="Result" style="font-size: 42px;">{{winner}}</div>
+    <div class="result">{{winner}}</div>
   <div class="fight-row">
     <div class="animation-placeholder" :class="{'protagonist-death': protagonistStatus.dead,
     'protagonist-run': protagonistStatus.run,
@@ -96,29 +96,40 @@
       </div>
     </div>
   </div>
-  <div v-if="isLeagueModalVisible" class="modal" id="league-modal" style="width: 35%;">
+  <div v-if="isLeagueModalVisible" class="modal-table" id="league-modal" style="width: 35%;">
     <h2>Upgrade Your League!</h2>
-    <div class="modal-content">
-      <div class="column" style="margin-top: 50px; gap: 50px; align-items: center; text-align: center;">
-        <div  class="row" style="margin-top: 50px;">
-          <div class="column">
-          <p>You are in league: {{chosenLeague}}</p>
-          <p>Next league: {{chosenLeague + 1}}</p>
-          </div>
-          <div class="column">
-          <p>Max bet: {{Math.round(Math.pow(chosenLeague * 20 , 2))}}</p>
-          <p>Max bet: {{Math.round(Math.pow((chosenLeague + 1) * 20, 2))}}</p>
-          </div>
-          <div class="column">
-          <p>$ for 1 click: {{Math.round(Math.pow(3, chosenLeague - 1))}}</p>
-          <p>$ for 1 click: {{Math.round(Math.pow(3, chosenLeague))}}</p>
-          </div>
-        </div>
+    <div class="modal-content-table">
+<!--      <div class="column" style="margin-top: 50px; gap: 50px; align-items: center; text-align: center;">-->
+<!--        <div  class="row" style="margin-top: 50px;">-->
+<!--          <div class="column">-->
+      <table class="league-table">
+        <thead>
+        <tr>
+          <th></th>
+          <th>League</th>
+          <th>Max Bet</th>
+          <th>$ for 1 click</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>{{chosenLeague}}</td>
+          <td>Current League</td>
+          <td>{{Math.round(Math.pow(chosenLeague * 20 , 2))}}</td>
+          <td>{{Math.round(Math.pow(3, chosenLeague - 1))}}</td>
+        </tr>
+        <tr>
+          <td>{{chosenLeague + 1}}</td>
+          <td>Next League</td>
+          <td>{{Math.round(Math.pow((chosenLeague + 1) * 20 , 2))}}</td>
+          <td>{{Math.round(Math.pow(3, chosenLeague))}}</td>
+          </tr>
+        </tbody>
+      </table>
         <div class="little-button" @click="upgradeLeague" style="margin-top: 50px;"><a>Upgrade</a><p>{{Math.round(Math.pow(10, chosenLeague + 1))}} $</p>
           <p style="color: red;">Alert! Once you upgrade your league, your enemies will become stronger.</p></div>
       </div>
     </div>
-  </div>
   <div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
 </template>
 
@@ -809,6 +820,9 @@ export default {
           else
             this.miniGame1Active = true;
         }
+      else{
+        alert("You don`t have enough money :(")
+      }
       },
       // try {
       //   const response = await authService.updateHero({
@@ -942,7 +956,7 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 38%;
+  height: 35%;
   align-content: center;
   justify-content: space-between;
 }
@@ -967,7 +981,6 @@ body {
   margin-top: 70px;
 }
 
-
 .button {
   text-align: center;
   background-color: transparent;
@@ -982,25 +995,25 @@ body {
   color: #d6c6dd;
   font-family: 'Press Start 2P', sans-serif;
   /*font-weight:bold;*/
-  font-size: 24px;
+  font-size: 20px;
   text-align: center;
   text-decoration: none;
   background-color: #6c3282;
   display: block;
   position: relative;
-  padding: 25px 30px;
+  padding: 20px 25px;
 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   text-shadow: 0px 1px 0px #000;
   filter: dropshadow(color=#000, offx=0px, offy=1px);
 
-  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, 0 10px 0 #601e7c;
-  -moz-box-shadow: inset 0 1px 0 #d6c6dd, 0 10px 0 #601e7c;
-  box-shadow: inset 0 1px 0 #d6c6dd, 0 10px 0 #2F0A3D;
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, 0 8px 0 #601e7c;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, 0 8px 0 #601e7c;
+  box-shadow: inset 0 1px 0 #d6c6dd, 0 8px 0 #2F0A3D;
 
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
 }
 
 .button a:hover {
@@ -1008,7 +1021,7 @@ body {
 }
 
 .button a:active {
-  top: 10px;
+  top: 8px;
   background-color: #601e7c;
 
   -webkit-box-shadow: inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
@@ -1022,13 +1035,13 @@ body {
   width: 100%;
   padding: 4px;
   position: absolute;
-  bottom: -15px;
+  bottom: -13px;
   left: -4px;
   z-index: -1;
   background-color: #2F0A3D;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
 }
 
 
@@ -1038,7 +1051,7 @@ body {
   font-family: 'Press Start 2P', sans-serif;
   position: relative;
   display: inline-block;
-  margin: 20px;
+  margin: 16px;
   cursor: pointer;
 }
 
@@ -1046,13 +1059,13 @@ body {
   color: #d6c6dd;
   font-family: 'Press Start 2P', sans-serif;
   /* font-weight:bold; */
-  font-size: 14px;
+  font-size: 12px;
   text-align: center;
   text-decoration: none;
   background-color: #6c3282;
   display: block;
   position: relative;
-  padding: 10px 15px;
+  padding: 8px 13px;
 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   text-shadow: 0px 1px 0px #000;
@@ -1097,7 +1110,7 @@ body {
 
 .little-button.disabled a{
   cursor: not-allowed;
-  top:8px;
+  top: 8px;
   background-color: #4b1363;
   -webkit-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
   -moz-box-shadow:inset 0 1px 0 #d6c6dd, inset 0 -3px 0 #2F0A3D;
@@ -1125,7 +1138,7 @@ body {
   background-color: #d6c6dd;
   display: block;
   position: relative;
-  padding: 10px 12px;
+  padding: 8px 10px;
 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   text-shadow: 0px 0px 0px #000;
@@ -1828,8 +1841,9 @@ body {
               height: 270px;
               bottom: 50px;
               margin-bottom: 10vh;
+            margin-top: 0px;
               background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
-              transform: translate(-220px, 10px);
+              transform: translate(-220px, 30px);
               transition: transform 1.5s ease;
               animation: kobold-run-animation-loop 1.5s steps(7) infinite;
             }
@@ -1852,7 +1866,7 @@ body {
               bottom: 50px;
               margin-bottom: 10vh;
               background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
-              transform: translate(0px, 10px);
+              transform: translate(0px, 30px);
               transition: transform 1s ease;
               animation: kobold-run-animation-loop 1s steps(7) infinite;
             }
@@ -1896,6 +1910,7 @@ body {
               height: 260px;
               bottom: 50px;
               margin-bottom: 10vh;
+            margin-top: 30px;
               transform: translate(-220px, 10px);
               background-image: url('assets/Enemies/Kobold/kobold-attack-reverse1.svg');
               animation: kobold-reverse-animation-loop-animation 0.97s steps(7) infinite;
@@ -2031,10 +2046,31 @@ body {
   background: transparent;
   border: 0px solid #e0c3fc;
   width: 100%;
-  height: 60%;
+  height: 65%;
   bottom: 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+span {
+  font-size: 16px;
+}
+
+label {
+  font-size: 16px;
+}
+
+.result {
+  font-size: 34px;
+}
+
+.modal-content-table {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -2049,6 +2085,23 @@ body {
   padding: 20px;
   border: 4px solid #e0c3fc;
   z-index: 10;
+}
+
+.modal-table {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: block;
+  color: #d6c6dd;
+  transform: translate(-50%, -50%);
+  background: #2d013d;
+  font-size: 14px;
+  opacity: 0.95;
+  padding: 20px;
+  border: 4px solid #e0c3fc;
+  z-index: 10;
+  align-items: center;
+  text-align: center;
 }
 
 .enemy-container {
@@ -2109,5 +2162,27 @@ body {
 .filter {
   filter: sepia(1) saturate(5) hue-rotate(-30deg);
 }
+
+.league-table {
+  width: 95%;
+}
+
+.league-table th, .leaderboard-table td {
+  border: 1px solid #d6c6dd;
+  padding: 10px;
+}
+
+.league-table th {
+  background-color: #6c3282;
+}
+
+.league-table tr:nth-child(even) {
+  background-color: #4b1f4b;
+}
+
+.league-table tr:hover {
+  background-color: #601e7c;
+}
+
 
 </style>

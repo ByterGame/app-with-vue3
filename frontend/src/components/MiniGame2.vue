@@ -5,7 +5,7 @@ export default {
             gameStarted: false,
             gameCountdownVisible: false,
             countdown: 3,
-            timeLeft:   7,
+            timeLeft:   20,
             sequence: [1, 2, 3, 4, 5],
             shuffledSequence: [],
             userClicks: [],
@@ -20,7 +20,7 @@ export default {
             this.gameEnded = false;
             this.userClicks = [];
             this.currentIndex = 0;
-            this.timeLeft = 7;
+            this.timeLeft = 20;
             this.countdown = 3;
             this.gameCountdownVisible = true;
 
@@ -38,30 +38,42 @@ export default {
         },
         startTimer() {
             this.gameStarted = true;
+
             const timerInterval = setInterval(() => {
                 if (this.timeLeft > 0) {
                     this.timeLeft--;
-                } else {
-                    clearInterval(timerInterval);
-                    this.endGame(false);
+                } else if(!this.gameEnded) {
+                  clearInterval(timerInterval);
+                  this.endGame(false);
+                } else{
+                  clearInterval(timerInterval);
                 }
             }, 1000);
         },
         shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+            // for (let i = array.length - 1; i > 0; i--) {
+            //     const j = Math.floor(Math.random() * (i + 1));
+            //     [array[i], array[j]] = [array[j], array[i]];
+            // }
+          for(let i = 0; i < array.length; i++){
+            let n = Math.floor(Math.random() * 10);
+            while(n in array){
+              n = Math.floor(Math.random() * 10);
             }
+            array[i] = n;
+              this.sequence[i] = n;
+          }
+          this.sequence.sort();
             return array;
         },
+
         registerClick(number) {
             if (this.gameEnded) return;
-
             if (number === this.sequence[this.currentIndex]) {
                 this.userClicks.push(number);
                 this.currentIndex++;
-
                 if (this.currentIndex === this.sequence.length) {
+                  this.gameEnded = true;
                     this.endGame(true);
                 }
             } else {
@@ -90,7 +102,7 @@ export default {
     <div v-if="!gameStarted && !gameEnded">
         <div class="rules-content">
             <h2>Game rules</h2>
-            <p>Click the numbers 1 to 5 in the correct order!</p>
+            <p>Click the numbers in the correct order!</p>
             <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Start</a></div>
         </div>
     </div>
