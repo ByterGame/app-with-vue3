@@ -568,6 +568,72 @@ export default {
         });
       }
       }
+      if(this.chosenEnemyId === 2){
+        if(this.nextPunch === 2){
+          if(this.lastPunch === 2){
+            this.lastPunch = 2;
+          return new Promise((resolve) => {
+            this.enemyStatus.normal = false;
+            this.enemyStatus.attack = true;
+            this.protagonistStatus.attacked = true;
+            setTimeout(() => {
+              this.enemyStatus.attack = false;
+              this.enemyStatus.normal = true;
+              this.protagonistStatus.attacked = false;
+              resolve();
+            }, 800 * 2);
+          });
+        }
+        return new Promise((resolve) => {
+          this.lastPunch = 2;
+          this.enemyStatus.normal = false;
+          this.protagonistStatus.attacked = true;
+          this.enemyStatus.attack = true;
+          setTimeout(() => {
+            this.enemyStatus.attack = false;
+            this.protagonistStatus.attacked = false;
+            this.enemyStatus.normal = true;
+            resolve();
+          },  800 * 2);
+        });
+        }
+          else {
+          if (this.lastPunch === 2) {
+            return new Promise((resolve) => {
+              this.lastPunch = 2;
+              this.enemyStatus.normal = false;
+              this.enemyStatus.attack = true;
+              this.protagonistStatus.attacked = true;
+              setTimeout(() => {
+                this.enemyStatus.attack = false;
+                this.protagonistStatus.attacked = false;
+                this.enemyStatus.reverseRun = true;
+                setTimeout(() => {
+                  this.enemyStatus.reverseRun = false;
+                  this.enemyStatus.normal = true;
+                  resolve();
+                }, 800);
+              }, 800 * 2);
+            });
+          }
+          return new Promise((resolve) => {
+            this.lastPunch = 2;
+            this.enemyStatus.normal = false;
+            this.protagonistStatus.attacked = true;
+            this.enemyStatus.attack = true;
+            setTimeout(() => {
+              this.enemyStatus.attack = false;
+              this.protagonistStatus.attacked = false;
+              this.enemyStatus.reverseRun = true;
+              setTimeout(() => {
+                this.enemyStatus.reverseRun = false;
+                this.enemyStatus.normal = true;
+                resolve();
+                }, 800);
+            }, 800 * 2);
+          });
+      }
+      }
       if(this.chosenEnemyId === 1 || this.chosenEnemyId === 3 || this.chosenEnemyId === 5){
           return this.enemyBomb().then(() => {
             this.lastPunch = 2;
@@ -789,6 +855,8 @@ export default {
 
     getReverseRunAnimationClass(enemyId) {
       switch (enemyId) {
+        case 2:
+          return 'dead-reverse-fly-animation';
         case 4:
           return 'skeleton-reverse-walk-animation';
         case 6:
@@ -1484,6 +1552,29 @@ body {
           }
 
           @keyframes dead-reverse-static-animation-loop-animation {
+            0% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg'); }
+            12.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse2.svg'); }
+            25% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse3.svg'); }
+            37.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse4.svg'); }
+            50% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse5.svg'); }
+            62.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse6.svg'); }
+            75% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse7.svg'); }
+            87.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse8.svg'); }
+            100% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg'); }
+          }
+
+          .dead-reverse-fly-animation{
+            width: 250px;
+            height: 250px;
+            bottom: 50px;
+            margin-bottom: 10vh;
+            transform: translate(0px, 0px);
+            transition: transform 1.2s ease;
+            background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg');
+            animation: dead-reverse-fly-animation-loop-animation 1.2s steps(9) infinite;
+          }
+
+          @keyframes dead-reverse-fly-animation-loop-animation {
             0% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse1.svg'); }
             12.5% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse2.svg'); }
             25% { background-image: url('assets/Enemies/Dead/dead_animation/dead-static-reverse3.svg'); }
