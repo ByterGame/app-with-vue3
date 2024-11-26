@@ -4,6 +4,7 @@
   <div v-if="!userLoggedIn" class="overlay"></div>
   <ResultTable v-if="this.showRatingTable"/>
   <MiniGame v-if="miniGameActive" @game-finished="evaluateGame" @close="closeMiniGame"/>
+  <MiniGame2 v-if="miniGame2Active" @game-finished="evaluateGame2" @close="closeMiniGame"/>
   <div class="clicker-section">
   <div class="balance">
     <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
@@ -124,6 +125,7 @@
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
 import MiniGame from "@/components/MiniGame.vue";
+import MiniGame2 from "@/components/MiniGame2.vue";
 import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
@@ -139,6 +141,7 @@ export default {
       isUpgradeModalVisible: false,
       isLeagueModalVisible: false,
       miniGameActive: false,
+      miniGame2Active: false,
       fightIsOn: false,
       lastPunch: 0,
       nextPunch: 0,
@@ -793,8 +796,14 @@ export default {
       if (this.balance >= sum) {
         this.balance -= sum;
         this.closeModals();
-        this.miniGameActive = true;
-      }
+          if(characteristic === "durability")
+            this.miniGameActive = true;
+          else if(characteristic === "strength")
+            this.miniGame2Active = true;
+          else
+            this.miniGame2Active = true;
+        }
+      },
       // try {
       //   const response = await authService.updateHero({
       //     username: this.usernameFromStore,
@@ -808,18 +817,29 @@ export default {
       // } catch (error) {
       //   console.error(error)
       // }
-    },
+    //},
 
     evaluateGame(result) {
       if(result === true){
-        this.character.speed++;
+        this.character.durability++;
       this.calculateWinRate();
       this.updateData();
       }
     },
 
+    evaluateGame2(result) {
+      if(result === true){
+        this.character.strength++;
+      this.calculateWinRate();
+      this.updateData();
+      }
+    },
+
+
+
     closeMiniGame() {
       this.miniGameActive = false;
+      this.miniGame2Active = false;
     },
 
     calculateWinRate() {
@@ -879,6 +899,7 @@ export default {
     ResultTable,
     RegistrationModal,
     MiniGame,
+    MiniGame2,
   },
 }
 

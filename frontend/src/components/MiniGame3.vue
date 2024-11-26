@@ -1,5 +1,4 @@
 <script>
-
 export default {
   data() {
     return {
@@ -73,14 +72,14 @@ export default {
   <div class="modal">
     <div v-if="!gameStarted && !gameEnded">
             <div class="rules-content">
-                <h2>Правила игры</h2>
-                <p>Нажмите на кнопку более 100 раз за 30 секунд!</p>
-                <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Старт</a></div>
+                <h2>Game rules</h2>
+                <p>Catch 30 points in 50 seconds by tapping on them</p>
+                <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Start</a></div>
             </div>
         </div>
 
         <div v-if="!gameStarted && gameCountdownVisible">
-            <h1 id="countdown-number">{{ countdown }}/100</h1>
+            <h1 id="countdown-number">{{ countdown }}</h1>
         </div>
 
         <div v-if="gameStarted" id="game">
