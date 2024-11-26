@@ -3,164 +3,122 @@
 export default {
   data() {
     return {
-      /*gameStarted: false,
-      gameCountdownVisible: false,
-      countdown: 3,
-      timeLeft: 30,
-      clickCount: 0,
-      gameEnded: false,
-      resultMessage: ''*/
-      words: ["апельсин", "банан", "киви", "груша", "яблоко"],
+      words: ["monster", "dragon", "skeleton", "creepy", "destructive force"],
       currentWordIndex: 0,
       currentWord: "",
       userInput: "",
       correctCount: 0,
+      incorrectCount: 0,
       timeRemaining: 10,
       gameOver: false,
-      timer: null,
-      countdown: 3,
+      gameResult: null,
+      gameStarted: false,
       gameCountdownVisible: false,
-    }
+      countdown: 3,
+      timer: null,
+    };
+  },
+  methods: {
+    startGame() {
+      this.gameStarted = false;
+      this.gameOver = false;
+      this.gameResult = null;
+      this.correctCount = 0;
+      this.incorrectCount = 0;
+      this.currentWordIndex = 0;
+      this.userInput = "";
+      this.countdown = 3;
+      this.gameCountdownVisible = true;
+
+      const countdownInterval = setInterval(() => {
+        if (this.countdown > 0) {
+          this.countdown--;
+        } else {
+          clearInterval(countdownInterval);
+          this.gameCountdownVisible = false;
+          this.startNewGame();
+        }
+      }, 1000);
     },
-    methods: {
-        // startGame() {
-        //     this.gameStarted = false;
-        //     this.gameEnded = false;
-        //     this.clickCount = 0;
-        //     this.timeLeft = 30;
-        //     this.countdown = 3;
-        //     this.gameCountdownVisible = true;
-        //
-        //     const countdownInterval = setInterval(() => {
-        //         if (this.countdown > 0) {
-        //             this.countdown--;
-        //         } else {
-        //             clearInterval(countdownInterval);
-        //             this.gameCountdownVisible = false;
-        //             this.startTimer();
-        //         }
-        //     }, 1000);
-        // },
-        // startTimer() {
-        //     this.gameStarted = true;
-        //     const timerInterval = setInterval(() => {
-        //         if (this.timeLeft > 0) {
-        //             this.timeLeft--;
-        //         } else {
-        //             clearInterval(timerInterval);
-        //             this.endGame();
-        //         }
-        //     }, 1000);
-        // },
-        startGame() {
-            this.gameOver = false;
-            this.correctCount = 0;
-            this.currentWordIndex = 0;
-            this.timeRemaining = 10;
-            this.userInput = "";
-            this.nextWord();
-            this.startTimer();
-            this.countdown = 3;
-            this.gameCountdownVisible = true;
-
-            const countdownInterval = setInterval(() => {
-                if (this.countdown > 0) {
-                    this.countdown--;
-                } else {
-                    clearInterval(countdownInterval);
-                    this.gameCountdownVisible = false;
-                    this.startTimer();
-                }
-            }, 1000);
-          },
-        startTimer() {
-          this.timer = setInterval(() => {
-            this.timeRemaining--;
-            if (this.timeRemaining <= 0) {
-              clearInterval(this.timer);
-              this.currentWordIndex++; // Переходим к следующему слову
-              this.nextWord(); // Загружаем следующее слово
-            }
-          }, 1000);
-        },
-        nextWord() {
-          if (this.currentWordIndex < this.words.length) {
-            this.currentWord = this.words[this.currentWordIndex];
-            this.userInput = "";
-            this.timeRemaining = 10; // Сбрасываем время
-          } else {
-            this.gameOver = true; // Игра окончена
-            clearInterval(this.timer); // Остановить таймер
-          }
-        },
-        checkWord() {
-          if (this.userInput === this.currentWord) {
-            this.correctCount++;
-          } else {
-            this.incorrectCount++;
-          }
-          this.currentWordIndex++; // Переходим к следующему слову
-          this.nextWord(); // Загружаем следующее слово
-        },
-
-        // registerClick() {
-        //     this.clickCount++;
-        // },
-        // endGame() {
-        //     this.gameStarted = false;
-        //     this.gameEnded = true;
-        //     let result = false;
-        //     if (this.clickCount > 100) {
-        //       result = true;
-        //       this.resultMessage = "Поздравляем! Вы набрали " + this.clickCount + " кликов!";
-        //     } else {
-        //       result = false;
-        //       this.resultMessage = "Вот и все! Вы набрали только " + this.clickCount + " кликов.";
-        //     }
-        //     this.$emit('game-finished', result);
-        // },
-      showMiniGameFalse(){
-          this.$emit('close', true);
+    startNewGame() {
+      this.timeRemaining = 10;
+      this.nextWord();
+      this.startTimer();
+      this.gameStarted = true;
+      this.$nextTick(() => {
+        this.$refs.userInput.focus();
+      });
+    },
+    nextWord() {
+      if (this.currentWordIndex < this.words.length) {
+        this.currentWord = this.words[this.currentWordIndex];
+        this.userInput = "";
+        this.timeRemaining = 10;
+      } else {
+        this.gameOver = true;
+        clearInterval(this.timer);
+        this.checkGameResult();
+        this.$emit('game-finished', this.gameResult);
       }
+    },
+    checkWord() {
+      if (this.userInput === this.currentWord) {
+        this.correctCount++;
+      } else {
+        this.incorrectCount++;
+      }
+      this.currentWordIndex++;
+      this.nextWord();
+    },
+    checkGameResult() {
+      if (this.correctCount === 5) {
+        this.gameResult = true;
+      } else {
+        this.gameResult = false;
+      }
+    },
+    startTimer() {
+      this.timer = setInterval(() => {
+        this.timeRemaining--;
+        if (this.timeRemaining <= 0) {
+          clearInterval(this.timer);
+          this.incorrectCount++;
+          this.currentWordIndex++;
+          this.nextWord();
+        }
+      }, 1000);
+    },
+    showMiniGameFalse(){
+      this.$emit('close', true);
     }
+  }
 }
 </script>
 
 <template>
   <div class="modal">
-    <div v-if="!gameStarted && !gameEnded">
+    <div v-if="!gameStarted && !gameOver">
             <div class="rules-content">
-                <h2>Правила игры</h2>
-<!--                <p>Нажмите на кнопку более 100 раз за 30 секунд!</p>-->
-                    <p>Запиши такие же слова на время!</p>
-                <div class="super-little-button" v-if="!startGame && !gameCountdownVisible" @click="startGame"><a>Старт</a></div>
+                <h2>Game rules</h2>
+                    <p>Write down the same words on time!</p>
+                <div class="super-little-button" v-if="!gameStarted && !gameOver &&!gameCountdownVisible" @click="startGame"><a>Start</a></div>
             </div>
         </div>
-
-<!--        <div v-if="!gameStarted && gameCountdownVisible">-->
-<!--            <h1 id="countdown-number">{{ countdown }}</h1>-->
-<!--        </div>-->
-        <div v-if="!startGame && gameCountdownVisible">
+        <div v-if="gameCountdownVisible && !gameOver">
             <h1 id="countdown-number">{{ countdown }}</h1>
         </div>
-
-<!--        <div v-if="gameStarted" id="game">-->
-<!--            <h2>Время: <span>{{ timeLeft }}</span> секунд</h2>-->
-<!--            <h2>Клики: <span>{{ clickCount }}</span></h2>-->
-<!--            <div class="little-button" @click="registerClick"><a>Нажми меня!</a></div>-->
-<!--        </div>-->
-        <div v-if="!gameOver">
-          <p>Слово: <strong>{{ currentWord }}</strong></p>
-          <input v-model="userInput" @keyup.enter="checkWord" placeholder="Введите слово..." />
-          <p>Осталось времени: {{ timeRemaining }} сек</p>
+        <div v-if="gameStarted && !gameOver">
+          <p>Word: <strong>{{ currentWord }}</strong></p>
+          <input ref="userInput" v-model="userInput" @keyup.enter="checkWord" placeholder="Enter a word..." />
+          <p>time left: {{ timeRemaining }} </p>
         </div>
-        <div v-else>
-          <h2>Результаты</h2>
-          <p>Успешно введено слов: {{ correctCount }}/5</p>
+        <div v-else-if="gameOver">
+          <h2>Result</h2>
+          <p>Successfully entered words: {{ correctCount }}/5</p>
+          <p v-if="gameResult === true">You win!</p>
+          <p v-if="gameResult === false">You lose!</p>
           <div class="little-button" @click="showMiniGameFalse"><a>Close</a></div>
         </div>
-
-<!--    <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>-->
   </div>
   <div class="overlay"></div>
 </template>

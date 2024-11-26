@@ -55,10 +55,10 @@ export default {
             let result = false;
             if (this.clickCount >= 100) {
               result = true;
-              this.resultMessage = "Поздравляем! Вы набрали " + this.clickCount + " кликов!";
+              this.resultMessage = "Congratulations! You have scored " + this.clickCount + " clicks!";
             } else {
               result = false;
-              this.resultMessage = "Вот и все! Вы набрали только " + this.clickCount + " кликов.";
+              this.resultMessage = "That's it! You only got " + this.clickCount + " clicks.";
             }
             this.$emit('game-finished', result);
         },
@@ -73,9 +73,9 @@ export default {
   <div class="modal">
     <div v-if="!gameStarted && !gameEnded">
             <div class="rules-content">
-                <h2>Правила игры</h2>
-                <p>Нажмите на кнопку более 100 раз за 30 секунд!</p>
-                <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Старт</a></div>
+                <h2>Game rules</h2>
+                <p>Press the button more than 100 times in 30 seconds!</p>
+                <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Start</a></div>
             </div>
         </div>
 
@@ -84,9 +84,9 @@ export default {
         </div>
 
         <div v-if="gameStarted" id="game">
-            <h2>Время: <span>{{ timeLeft }}</span> секунд</h2>
-            <h2>Клики: <span>{{ clickCount }}</span></h2>
-            <div class="little-button" @click="registerClick"><a>Нажми меня!</a></div>
+            <h2>Time: <span>{{ timeLeft }}</span> </h2>
+            <h2>Clicks: <span>{{ clickCount }}</span></h2>
+            <div class="little-button" @click="registerClick"><a>Press me!</a></div>
         </div>
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
