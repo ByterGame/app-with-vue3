@@ -7,3 +7,4 @@ class User(AbstractUser):
     heroStrength = models.IntegerField(default=1)
     heroSpeed = models.IntegerField(default=1)
     heroDurability = models.IntegerField(default=1)
+    chosenLeague = models.IntegerField(default=1)

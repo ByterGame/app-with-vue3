@@ -56,7 +56,7 @@ export default {
       <div class="little-button" @click="showRatingFalse"><a>Close</a></div>
     </div>
   </div>
-
+<div class="overlay"></div>
 </template>
 
 <style scoped>
@@ -151,5 +151,16 @@ export default {
   display: inline-block;
   margin: 20px;
   cursor: pointer;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 5;
 }
 </style>

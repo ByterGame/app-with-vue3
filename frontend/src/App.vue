@@ -4,17 +4,17 @@
   <div v-if="!userLoggedIn" class="overlay"></div>
   <ResultTable v-if="this.showRatingTable"/>
   <div class="clicker-section">
-    <div class="balance"><div class="little-button" @click="showRatingTrue"><a>Rating</a></div>
-      <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
-      <div class="little-button"><a>Balance: $ {{ balance.toFixed(0) }}</a></div>
-    </div>
-    <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
-      <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
-    </div>
-    <div class="container">
-      <div class="button" @click="addMoney"><a>Click Me!</a></div>
-    </div>
+  <div class="balance">
+    <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
+    <div class="little-button" @click="showRatingTrue"><a>Balance: $ {{ balance.toFixed(0) }}</a></div>
   </div>
+  <div class="upgrade-button" @click="openUpgradeModal" id="open-upgrade">
+    <div class="little-button" id="open-upgrade"><a>Upgrade</a></div>
+  </div>
+  <div class="container">
+    <div class="button" @click="addMoney"><a>Click Me!</a></div>
+  </div>
+</div>
   <div class="animation-section">
     <div class="input-container">
         <div class="little-button" @click="openEnemyModal" id="open-enemy" :class="{'disabled': fightIsOn}"
@@ -122,7 +122,7 @@
 
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
-import MiniGame from "@/components/MiniGame.vue";
+// import MiniGame from "@/components/MiniGame.vue";
 import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
@@ -130,6 +130,7 @@ export default {
   data() {
     return {
       balance: 10000,
+      save: 0,
       maximumBalance: 0,
       bet: 10,
       userLoggedIn: false,
@@ -182,24 +183,28 @@ export default {
       }
     }
   },
+
   watch:{
     userLoggedIn (oldValue, newValue) {
       if(newValue === false) {
         this.getData();
+        setTimeout(this.loadEnemiesCharacteristics, 75)
         setTimeout(this.calculateWinRate, 150);
         setTimeout(this.calculateWinOdd, 150);
       }
     }
   },
+
   mounted() {
     this.calculateWinRate();
     this.calculateWinOdd();
     window.addEventListener('keydown', this.handleKeyDown);
-
   },
+
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleKeyDown);
   },
+
   updated() {
     this.save++;
     if (this.userLoggedIn && this.save >= 3) {
@@ -240,6 +245,7 @@ export default {
           heroStrength: this.character["strength"],
           heroSpeed: this.character["speed"],
           heroDurability: this.character["durability"],
+          chosenLeague: this.chosenLeague,
         });
         if (response.status === 200) {
           console.log('save');
@@ -273,6 +279,7 @@ export default {
         this.character['speed'] = response.data['heroSpeed'];
         this.character['strength'] = response.data['heroStrength'];
         this.character['durability'] = response.data['heroDurability'];
+        this.chosenLeague = response.data['chosenLeague'];
       } catch (error) {
         console.error(error);
       }
@@ -300,6 +307,7 @@ export default {
         this.closeModals();
       }
     },
+
     protagonistRun(){
       return new Promise((resolve) => {
         this.protagonistStatus.run = true;
@@ -454,6 +462,7 @@ export default {
         }, 700 * 2);
       });
     },
+
     enemyBomb(){
       return new Promise((resolve) => {
         this.enemyStatus.normal = false;
@@ -468,8 +477,9 @@ export default {
 
     enemyAttack() {
       if(this.chosenEnemyId === 4 || this.chosenEnemyId === 6){
-        if(this.lastPunch === 2){
-          this.lastPunch = 2;
+        if(this.nextPunch === 2){
+          if(this.lastPunch === 2){
+            this.lastPunch = 2;
           return new Promise((resolve) => {
             this.enemyStatus.normal = false;
             this.enemyStatus.attack = true;
@@ -482,10 +492,43 @@ export default {
             }, 800 * 2);
           });
         }
-        if(this.nextPunch === 1){
-          return this.enemyRun().then(() => {
+      return this.enemyRun().then(() => {
+        return new Promise((resolve) => {
           this.lastPunch = 2;
+          this.enemyStatus.normal = false;
+          this.protagonistStatus.attacked = true;
+          this.enemyStatus.attack = true;
+          setTimeout(() => {
+            this.enemyStatus.attack = false;
+            this.protagonistStatus.attacked = false;
+            this.enemyStatus.normal = true;
+            resolve();
+          },  800 * 2);
+            });
+          });
+        }
+          else {
+          if (this.lastPunch === 2) {
+            return new Promise((resolve) => {
+              this.lastPunch = 2;
+              this.enemyStatus.normal = false;
+              this.enemyStatus.attack = true;
+              this.protagonistStatus.attacked = true;
+              setTimeout(() => {
+                this.enemyStatus.attack = false;
+                this.protagonistStatus.attacked = false;
+                this.enemyStatus.reverseRun = true;
+                setTimeout(() => {
+                  this.enemyStatus.reverseRun = false;
+                  this.enemyStatus.normal = true;
+                  resolve();
+                }, 800);
+              }, 800 * 2);
+            });
+          }
+          return this.enemyRun().then(() => {
           return new Promise((resolve) => {
+            this.lastPunch = 2;
             this.enemyStatus.normal = false;
             this.protagonistStatus.attacked = true;
             this.enemyStatus.attack = true;
@@ -501,26 +544,7 @@ export default {
             }, 800 * 2);
           });
         });
-        }
-      return this.enemyRun().then(() => {
-        this.lastPunch = 2;
-        return new Promise((resolve) => {
-          this.enemyStatus.normal = false;
-          this.protagonistStatus.attacked = true;
-          this.enemyStatus.attack = true;
-          setTimeout(() => {
-            this.enemyStatus.attack = false;
-            this.enemyStatus.normal = true;
-            this.protagonistStatus.attacked = false;
-            this.enemyStatus.reverseRun = true;
-              setTimeout(() => {
-                this.enemyStatus.reverseRun = false;
-                this.enemyStatus.normal = true;
-                resolve();
-                }, 800);
-            }, 800 * 2);
-        });
-      });
+      }
       }
       if(this.chosenEnemyId === 1 || this.chosenEnemyId === 3 || this.chosenEnemyId === 5){
           return this.enemyBomb().then(() => {
@@ -619,7 +643,9 @@ export default {
           await this.protagonistDead();
           this.winner = 'YOU LOSE';
         }
-        this.bet = 10;
+        this.updateData();
+        // this.bet = 10;
+      this.lastPunch = 0;
     },
     getBombAnimationClass(enemyId) {
       switch (enemyId) {
@@ -766,6 +792,7 @@ export default {
         this.character[characteristic]++;
       }
       this.calculateWinRate();
+      this.updateData();
       // try {
       //   const response = await authService.updateHero({
       //     username: this.usernameFromStore,
@@ -813,11 +840,20 @@ export default {
       }
     },
 
+    loadEnemiesCharacteristics() {
+      for(const enemy of this.enemies){
+        enemy.speed = enemy.speed + 5*this.chosenLeague;
+        enemy.strength = enemy.strength + 5*this.chosenLeague;
+        enemy.durability = enemy.durability + 5*this.chosenLeague;
+      }
+    },
+
     upgradeLeague() {
     if(this.balance >= Math.round(Math.pow(10, this.chosenLeague + 1))){
       this.balance -= Math.round(Math.pow(10, this.chosenLeague + 1));
       this.chosenLeague++;
       this.changeEnemiesCharacteristics();
+      this.updateData();
     }
     else{
       alert("You don`t have enough money");
@@ -828,7 +864,7 @@ export default {
   components: {
     ResultTable,
     RegistrationModal,
-    MiniGame
+    // MiniGame
   },
 }
 
@@ -1585,7 +1621,7 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
-              background-image: url('assets/Enemies/Skeleton/skeleton-walk1.svg');
+              background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg');
               transform: translate(-220px, -5px);
               transition: transform 1.6s ease;
               animation: skeleton-walk-loop-animation 0.8s steps(13) infinite;
@@ -1613,8 +1649,8 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
-              background-image: url('assets/Enemies/Kobold/kobold-attack1.svg');
-              transform: translate(0px, 0px);
+              background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg');
+              transform: translate(0px, -20px);
               transition: transform 0.8s ease;
               animation: skeleton-reverse-walk-loop-animation 0.8s steps(13) infinite;
           }
@@ -1731,8 +1767,8 @@ body {
         }
 
           .kobold-run-animation {
-              width: 300px;
-              height: 300px;
+              width: 270px;
+              height: 270px;
               bottom: 50px;
               margin-bottom: 10vh;
               background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
@@ -1753,9 +1789,32 @@ body {
             100% { background-image: url('assets/Enemies/Kobold/kobold-run1.svg'); }
         }
 
+          .kobold-reverse-run-animation {
+              width: 270px;
+              height: 270px;
+              bottom: 50px;
+              margin-bottom: 10vh;
+              background-image: url('assets/Enemies/Kobold/kobold-run1.svg');
+              transform: translate(0px, 10px);
+              transition: transform 1s ease;
+              animation: kobold-run-animation-loop 1s steps(7) infinite;
+            }
+
+          @keyframes kobold-reverse-run-animation-loop {
+            100% { background-image: url('assets/Enemies/Kobold/kobold-run1.svg'); }
+            77.77% { background-image: url('assets/Enemies/Kobold/kobold-run2.svg'); }
+            66.66% { background-image: url('assets/Enemies/Kobold/kobold-run3.svg'); }
+            33.33% { background-image: url('assets/Enemies/Kobold/kobold-run4.svg'); }
+            55.55% { background-image: url('assets/Enemies/Kobold/kobold-run5.svg'); }
+            44.44% { background-image: url('assets/Enemies/Kobold/kobold-run6.svg'); }
+            22.22% { background-image: url('assets/Enemies/Kobold/kobold-run7.svg'); }
+            11.11% { background-image: url('assets/Enemies/Kobold/kobold-run8.svg'); }
+            0% { background-image: url('assets/Enemies/Kobold/kobold-run1.svg'); }
+        }
+
           .kobold-death-animation {
-            width: 270px;
-            height: 270px;
+            width: 260px;
+            height: 260px;
             bottom: 50px;
             margin-bottom: 10vh;
             transform: translate(0,20px);
@@ -1776,8 +1835,8 @@ body {
           }
 
           .kobold-reverse-animation {
-              width: 270px;
-              height: 270px;
+              width: 260px;
+              height: 260px;
               bottom: 50px;
               margin-bottom: 10vh;
               transform: translate(-220px, 10px);
@@ -1795,8 +1854,8 @@ body {
         }
 
           .kobold-static-animation {
-              width: 270px;
-              height: 270px;
+              width: 260px;
+              height: 260px;
               bottom: 50px;
               margin-bottom: 10vh;
               background-image: url('assets/Enemies/Kobold/kobold-static1.svg');
