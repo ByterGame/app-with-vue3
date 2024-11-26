@@ -18,4 +18,4 @@ P.S.
 ----
 We named our game after the usernames of team members: Byter, Yobysheva, Eeetwinkle
 
-![Image alt](https://github.com//ByterGame/app-with-vue3/frontend/src/assets/example.png)
+![Project screenshot](https://github.com/ByterGame/app-with-vue3/tree/main/frontend/src/assets/example.png)
