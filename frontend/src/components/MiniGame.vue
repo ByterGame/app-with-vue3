@@ -1,12 +1,30 @@
 <script>
-
 export default {
   data() {
     return {
-      words: ["monster", "dragon", "skeleton", "creepy", "destructive force"],
+      words: [
+        "monster", "dragon", "skeleton", "creepy", "destructive force",
+        "vampire", "zombie", "werewolf", "goblin", "phantom",
+        "gorgon", "chupacabra", "minotaur", "gremlin", "ogre",
+        "bigfoot", "mermaid", "fairy", "demon", "phantom",
+        "centaur", "yeti", "slime", "mummy", "sprite",
+        "elemental", "banshee", "ghost", "manticore", "wendigo",
+        "siren", "imp", "reaper", "kraken", "sasquatch",
+        "nymph", "dryad", "kobald", "battler", "hypogryph",
+        "cyclops", "ghoul", "selkie", "jotun", "harpy",
+        "ghostly", "lurker", "wraith", "succubus", "belphegor",
+        "carnivorous", "kinoko", "rakshasa", "dryder", "huldufolk",
+        "kappa", "jackalope", "sukubus", "yurei", "hellhound",
+        "sphinx", "kuih", "onryo", "phouka", "skinwalker",
+        "yeti", "osmanthus", "aswang", "bhoot", "vodyanoy",
+        "chimaera", "dracolich", "duergar", "gorgon", "naga",
+        "rakshasa", "charybdis", "yuki-onna", "nuckelavee", "dreamwraith",
+        "scylla", "mokele-mbembe", "Baba Yaga", "doppelganger", "kraken"
+      ],
       currentWordIndex: 0,
       currentWord: "",
       userInput: "",
+      selectedWords: [],
       correctCount: 0,
       incorrectCount: 0,
       timeRemaining: 10,
@@ -30,6 +48,9 @@ export default {
       this.countdown = 3;
       this.gameCountdownVisible = true;
 
+      // Случайным образом выбираем 5 слов
+      this.selectRandomWords();
+
       const countdownInterval = setInterval(() => {
         if (this.countdown > 0) {
           this.countdown--;
@@ -39,6 +60,11 @@ export default {
           this.startNewGame();
         }
       }, 1000);
+    },
+    selectRandomWords() {
+      const shuffledWords = this.words.sort(() => 0.5 - Math.random());
+      this.selectedWords = shuffledWords.slice(0, 5);
+      this.currentWordIndex = 0;
     },
     startNewGame() {
       this.timeRemaining = 10;
@@ -50,10 +76,11 @@ export default {
       });
     },
     nextWord() {
-      if (this.currentWordIndex < this.words.length) {
-        this.currentWord = this.words[this.currentWordIndex];
+      if (this.currentWordIndex < this.selectedWords.length) {
+        this.currentWord = this.selectedWords[this.currentWordIndex];
         this.userInput = "";
         this.timeRemaining = 10;
+        this.startTimer();
       } else {
         this.gameOver = true;
         clearInterval(this.timer);
@@ -78,17 +105,18 @@ export default {
       }
     },
     startTimer() {
+      clearInterval(this.timer);
       this.timer = setInterval(() => {
         this.timeRemaining--;
         if (this.timeRemaining <= 0) {
           clearInterval(this.timer);
           this.incorrectCount++;
-          this.currentWordIndex++;
+          this.checkWord();
           this.nextWord();
         }
       }, 1000);
     },
-    showMiniGameFalse(){
+    showMiniGameFalse() {
       this.$emit('close', true);
     }
   }
@@ -98,27 +126,29 @@ export default {
 <template>
   <div class="modal">
     <div v-if="!gameStarted && !gameOver">
-            <div class="rules-content">
-                <h2>Game rules</h2>
-                    <p>Write down the same words on time!</p>
-                <div class="super-little-button" v-if="!gameStarted && !gameOver &&!gameCountdownVisible" @click="startGame"><a>Start</a></div>
-            </div>
+      <div class="rules-content">
+        <h2>Game rules</h2>
+        <p>Write down the same words on time!</p>
+        <div class="super-little-button" v-if="!gameStarted && !gameOver && !gameCountdownVisible" @click="startGame">
+          <a>Start</a>
         </div>
-        <div v-if="gameCountdownVisible && !gameOver">
-            <h1 id="countdown-number">{{ countdown }}</h1>
-        </div>
-        <div v-if="gameStarted && !gameOver">
-          <p>Word: <strong>{{ currentWord }}</strong></p>
-          <input ref="userInput" v-model="userInput" @keyup.enter="checkWord" placeholder="Enter a word..." />
-          <p>time left: {{ timeRemaining }} </p>
-        </div>
-        <div v-else-if="gameOver">
-          <h2>Result</h2>
-          <p>Successfully entered words: {{ correctCount }}/5</p>
-          <p v-if="gameResult === true">You win!</p>
-          <p v-if="gameResult === false">You lose!</p>
-          <div class="little-button" @click="showMiniGameFalse"><a>Close</a></div>
-        </div>
+      </div>
+    </div>
+    <div v-if="gameCountdownVisible && !gameOver">
+      <h1 id="countdown-number">{{ countdown }}</h1>
+    </div>
+    <div v-if="gameStarted && !gameOver">
+      <p>Word: <strong>{{ currentWord }}</strong></p>
+      <input ref="userInput" v-model="userInput" @keyup.enter="checkWord" placeholder="Enter a word..." />
+      <p>time left: {{ timeRemaining }}</p>
+    </div>
+    <div v-else-if="gameOver">
+      <h2>Result</h2>
+      <p>Successfully entered words: {{ correctCount }}/5</p>
+      <p v-if="gameResult === true">You win!</p>
+      <p v-if="gameResult === false">You lose!</p>
+      <div class="little-button" @click="showMiniGameFalse"><a>Close</a></div>
+    </div>
   </div>
   <div class="overlay"></div>
 </template>
