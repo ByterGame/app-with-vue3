@@ -59,24 +59,26 @@ export default {
 </script>
 
 <template>
-    <div v-if="!gameStarted && !gameEnded" class="overlay">
+  <div class="modal">
+    <div v-if="!gameStarted && !gameEnded">
             <div class="rules-content">
                 <h2>Правила игры</h2>
                 <p>Нажмите на кнопку более 100 раз за 30 секунд!</p>
-                <button @click="startGame">Старт</button>
+                <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Старт</a></div>
             </div>
         </div>
 
-        <div v-if="!gameStarted && gameCountdownVisible" class="overlay">
+        <div v-if="!gameStarted && gameCountdownVisible">
             <h1 id="countdown-number">{{ countdown }}</h1>
         </div>
 
         <div v-if="gameStarted" id="game">
             <h2>Время: <span>{{ timeLeft }}</span> секунд</h2>
             <h2>Клики: <span>{{ clickCount }}</span></h2>
-            <button @click="registerClick">Нажми меня!</button>
-            <h2 v-if="gameEnded">{{ resultMessage }}</h2>
+            <div class="little-button" @click="registerClick"><a>Нажми меня!</a></div>
         </div>
+    <h2 v-if="gameEnded">{{ resultMessage }}</h2>
+  </div>
 </template>
 
 <style scoped>
@@ -142,6 +144,72 @@ export default {
   -moz-border-radius: 3px;
   border-radius: 3px;
 }
+
+
+.super-little-button {
+  text-align: center;
+  background-color: transparent;
+  font-family: 'Press Start 2P', sans-serif;
+  position: relative;
+  display: inline-block;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.super-little-button a {
+  color: #6c3282;
+  font-family: 'Press Start 2P', sans-serif;
+  /* font-weight:bold; */
+  font-size: 10px;
+  text-align: center;
+  text-decoration: none;
+  background-color: #d6c6dd;
+  display: block;
+  position: relative;
+  padding: 10px 12px;
+
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-shadow: 0px 0px 0px #000;
+  filter: dropshadow(color=#000, offx=0px, offy=1px);
+
+  -webkit-box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+  -moz-box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+  box-shadow: inset 0 1px 0 #d6c6dd, 0 5px 0 #2F0A3D;
+
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+
+.super-little-button a:hover {
+  background-color: #601e7c;
+  color: #d6c6dd;
+}
+
+.super-little-button a:active {
+  top: 8px;
+  background-color: #2F0A3D;
+
+  -webkit-box-shadow: inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+  -moz-box-shadow: inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+  box-shadow: inset 0 1px 0 #2F0A3D, inset 0 -2px 0 #d6c6dd;
+}
+
+.super-little-button:after {
+  content: "";
+  height: 100%;
+  width: 100%;
+  padding: 2px;
+  position: absolute;
+  bottom: -5px;
+  left: -2px;
+  z-index: -1;
+  background-color: #2F0A3D;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+
 
 .modal {
   position: fixed;

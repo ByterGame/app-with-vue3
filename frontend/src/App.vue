@@ -3,6 +3,7 @@
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
   <ResultTable v-if="this.showRatingTable"/>
+  <MiniGame v-if="miniGameActive"/>
   <div class="clicker-section">
   <div class="balance">
     <div class="little-button" @click="openLeagueModal"><a>League {{chosenLeague}}</a></div>
@@ -122,7 +123,7 @@
 
 <script>
 import RegistrationModal from "@/components/RegistrationModal.vue";
-// import MiniGame from "@/components/MiniGame.vue";
+import MiniGame from "@/components/MiniGame.vue";
 import ResultTable from "@/components/ResultTable.vue";
 import {authService} from "@/services/auth";
 
@@ -137,6 +138,7 @@ export default {
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       isLeagueModalVisible: false,
+      miniGameActive: false,
       fightIsOn: false,
       lastPunch: 0,
       nextPunch: 0,
@@ -603,6 +605,7 @@ export default {
         this.bet = 10;
         return 0;
       }
+      this.winner = 'Who will win?';
         const winNumber = Math.random();
         this.balance -= this.bet;
         this.fightIsOn = true;
@@ -864,7 +867,7 @@ export default {
   components: {
     ResultTable,
     RegistrationModal,
-    // MiniGame
+    MiniGame,
   },
 }
 
@@ -1590,6 +1593,7 @@ body {
               height: 250px;
               bottom: 50px;
               margin-bottom: 10vh;
+            margin-top: 20px;
               background-image: url('assets/Enemies/Skeleton/skeleton_new1.svg');
               animation: skeleton-loop-animation 1.8s steps(7) infinite;
             }
@@ -1621,6 +1625,7 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
+            margin-top: 20px;
               background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg');
               transform: translate(-220px, -5px);
               transition: transform 1.6s ease;
@@ -1649,10 +1654,11 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
+            margin-top: 65px;
               background-image: url('assets/Enemies/Skeleton/skeleton-walk8.svg');
-              transform: translate(0px, -20px);
+              transform: translate(0px,-23px);
               transition: transform 0.8s ease;
-              animation: skeleton-reverse-walk-loop-animation 0.8s steps(13) infinite;
+              animation: skeleton-reverse-walk-loop-animation 1s steps(13) infinite;
           }
 
           @keyframes skeleton-reverse-walk-loop-animation {
@@ -1677,6 +1683,7 @@ body {
             height: 200px;
             bottom: 50px;
             margin-bottom: 10vh;
+            margin-top: 20px;
             background-image: url('assets/Enemies/Skeleton/skeleton-death14.svg');
             animation: skeleton-death-loop-animation 1.2s steps(9) 1;
           }
@@ -1702,6 +1709,7 @@ body {
               width: 240px;
               height: 240px;
               margin-bottom: 10vh;
+            margin-top: 20px;
               transform: translate(-250px,-30px);
               background-image: url('assets/Enemies/Skeleton/skeleton-reverse1.svg');
               animation: skeleton-reverse-loop-animation 1.6s steps(7) infinite;
@@ -1734,6 +1742,7 @@ body {
               height: 190px;
               bottom: 50px;
               margin-bottom: 10vh;
+            margin-top: 20px;
               background-image: url('assets/Enemies/Skeleton/skeleton-reverse-static1.svg');
               animation: skeleton-reverse-static-animation-loop-animation 0.7s steps(7) infinite;
             }
