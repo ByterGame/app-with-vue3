@@ -5,7 +5,7 @@ export default {
             gameStarted: false,
             gameCountdownVisible: false,
             countdown: 3,
-            timeLeft:   20,
+            timeLeft: 7,
             sequence: [1, 2, 3, 4, 5],
             shuffledSequence: [],
             userClicks: [],
@@ -20,7 +20,6 @@ export default {
             this.gameEnded = false;
             this.userClicks = [];
             this.currentIndex = 0;
-            this.timeLeft = 20;
             this.countdown = 3;
             this.gameCountdownVisible = true;
 
@@ -51,19 +50,19 @@ export default {
             }, 1000);
         },
         shuffleArray(array) {
-            // for (let i = array.length - 1; i > 0; i--) {
-            //     const j = Math.floor(Math.random() * (i + 1));
-            //     [array[i], array[j]] = [array[j], array[i]];
-            // }
-          for(let i = 0; i < array.length; i++){
-            let n = Math.floor(Math.random() * 10);
-            while(n in array){
-              n = Math.floor(Math.random() * 10);
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
             }
-            array[i] = n;
-              this.sequence[i] = n;
-          }
-          this.sequence.sort();
+          // for(let i = 0; i < array.length; i++){
+          //   let n = Math.floor(Math.random() * 100);
+          //   while(n in array){
+          //     n = Math.floor(Math.random() * 100);
+          //   }
+          //   array[i] = n;
+          //     this.sequence[i] = n;
+          // }
+          // this.sequence.sort();
             return array;
         },
 
@@ -84,9 +83,9 @@ export default {
             this.gameStarted = false;
             this.gameEnded = true;
             if (success) {
-                this.resultMessage = "Congratulations! You completed the sequence!";
+                this.resultMessage = "You win! Congratulations! You completed the sequence!";
             } else {
-                this.resultMessage = "Wrong sequence! Game over!";
+                this.resultMessage = "Wrong sequence or time limit reached! Game over!";
             }
             this.$emit('game-finished', success);
         },
@@ -121,7 +120,7 @@ export default {
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
   </div>
-  <div class="overlay"></div>
+  <div class="overlay" @click="gameEnded || (!gameStarted && !gameCountdownVisible ) ? showMiniGameFalse() : null"></div>
 </template>
 
 

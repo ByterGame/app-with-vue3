@@ -22,8 +22,10 @@ export default {
   },
   methods: {
     showRatingFalse() {
-      this.$store.dispatch('updateShowRatingTable', false);
-      console.log(this.showRatingTable)
+      // this.$store.dispatch('updateShowRatingTable', false);
+      // console.log(this.showRatingTable)
+      this.$emit('close', true);
+
     },
     async getStats() {
       const response = await authService.getUsersStats(this.usernameFromStore);
@@ -53,10 +55,9 @@ export default {
         </tr>
         </tbody>
       </table>
-      <div class="little-button" @click="showRatingFalse"><a>Close</a></div>
     </div>
   </div>
-<div class="overlay"></div>
+<div class="overlay" @click="showRatingFalse"></div>
 </template>
 
 <style scoped>

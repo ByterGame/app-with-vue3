@@ -2,7 +2,7 @@
   <RegistrationModal :userLoggedIn="userLoggedIn"
                      v-if="!userLoggedIn" @login="handleLogin"/>
   <div v-if="!userLoggedIn" class="overlay"></div>
-  <ResultTable v-if="this.showRatingTable"/>
+  <ResultTable v-if="isRatingModalVisible" @close="closeModals"/>
   <MiniGame v-if="miniGameActive" @game-finished="evaluateGame" @close="closeMiniGame"/>
   <MiniGame2 v-if="miniGame2Active" @game-finished="evaluateGame2" @close="closeMiniGame"/>
   <MiniGame3 v-if="miniGame3Active" @game-finished="evaluateGame3" @close="closeMiniGame"/>
@@ -125,9 +125,9 @@
           <td>{{Math.round(Math.pow(3, chosenLeague))}}</td>
           </tr>
         </tbody>
-      </table>
-        <div class="little-button" @click="upgradeLeague" style="margin-top: 50px;"><a>Upgrade</a><p>{{Math.round(Math.pow(10, chosenLeague + 1))}} $</p>
-          <p style="color: red;">Alert! Once you upgrade your league, your enemies will become stronger.</p></div>
+      </table>          <p style="color: red; margin-top: 50px;">Alert! Once you upgrade your league, your enemies will become stronger.</p></div>
+
+        <div class="little-button" @click="upgradeLeague" ><a>Upgrade</a><p>{{Math.round(Math.pow(10, chosenLeague + 1))}} $</p>
       </div>
     </div>
   <div v-if="isModalVisible" class="overlay" @click="closeModals" id="overlay"></div>
@@ -153,6 +153,7 @@ export default {
       isEnemyModalVisible: false,
       isUpgradeModalVisible: false,
       isLeagueModalVisible: false,
+      isRatingModalVisible: false,
       miniGameActive: false,
       miniGame2Active: false,
       miniGame3Active: false,
@@ -234,7 +235,7 @@ export default {
 
   computed: {
     isModalVisible() {
-      return this.isEnemyModalVisible || this.isUpgradeModalVisible || this.isLeagueModalVisible;
+      return this.isEnemyModalVisible || this.isUpgradeModalVisible || this.isLeagueModalVisible || this.isRatingModalVisible;
     },
     usernameFromStore() {
       return this.$store.state.username;
@@ -320,6 +321,7 @@ export default {
       this.isEnemyModalVisible = false;
       this.isUpgradeModalVisible = false;
       this.isLeagueModalVisible = false;
+      this.isRatingModalVisible = false;
     },
 
     handleKeyDown(event) {
@@ -801,9 +803,10 @@ export default {
     },
 
     showRatingTrue() {
-      this.$store.dispatch('updateShowRatingTable', true);
-      console.log(this.showRatingTable)
-      console.log(this.$store.state.showRatingTable)
+      // this.$store.dispatch('updateShowRatingTable', true);
+      // console.log(this.showRatingTable)
+      // console.log(this.$store.state.showRatingTable)
+      this.isRatingModalVisible = true;
     },
 
     upgrade(characteristic) {

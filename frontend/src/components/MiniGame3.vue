@@ -91,10 +91,10 @@ export default {
             let result = false;
             if (this.clickCount >= 10) {
               result = true;
-              this.resultMessage = "Congratulations! You reached " + this.clickCount + " clicks!";
+              this.resultMessage = "You win! Congratulations! You reached " + this.clickCount + " clicks!";
             } else {
               result = false;
-              this.resultMessage = "Unfortunately! You got only " + this.clickCount + " clicks.";
+              this.resultMessage = "Tpu lose. Unfortunately! You got only " + this.clickCount + " clicks.";
             }
             this.$emit('game-finished', result);
         },
@@ -129,7 +129,7 @@ export default {
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
   </div>
-  <div class="overlay"></div>
+  <div class="overlay" @click="gameEnded || (!gameStarted && !gameCountdownVisible ) ? showMiniGameFalse() : null"></div>
 </template>
 
 <style scoped>
