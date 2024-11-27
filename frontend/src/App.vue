@@ -145,7 +145,7 @@ import {authService} from "@/services/auth";
 export default {
   data() {
     return {
-      balance: 10000,
+      balance: 0,
       save: 0,
       maximumBalance: 0,
       bet: 10,
