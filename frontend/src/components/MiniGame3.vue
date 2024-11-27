@@ -5,7 +5,7 @@ export default {
       gameStarted: false,
       gameCountdownVisible: false,
       countdown: 3,
-      timeLeft: 40,
+      timeLeft: 30,
       clickCount: 0,
       gameEnded: false,
       resultMessage: '',
@@ -36,9 +36,6 @@ export default {
         startGame() {
             this.gameStarted = false;
             this.gameEnded = false;
-            this.clickCount = 0;
-            this.timeLeft = 30;
-            this.countdown = 3;
             this.gameCountdownVisible = true;
             const countdownInterval = setInterval(() => {
                 if (this.countdown > 0) {
@@ -126,7 +123,7 @@ export default {
     <div v-if="!gameStarted && !gameEnded">
             <div class="rules-content">
                 <h2>Game rules</h2>
-                <p>Catch 10 points in 40 seconds by tapping on them</p>
+                <p>Catch 10 points in {{timeLeft}} seconds by tapping on them</p>
                 <div class="super-little-button" v-if="!gameStarted && !gameCountdownVisible" @click="startGame"><a>Start</a></div>
             </div>
         </div>
@@ -145,7 +142,7 @@ export default {
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
   </div>
-  <div class="overlay" @click="gameEnded || (!gameStarted && !gameCountdownVisible ) ? showMiniGameFalse() : null"></div>
+  <div class="overlay"></div>
 </template>
 
 <style scoped>

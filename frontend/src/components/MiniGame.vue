@@ -168,7 +168,7 @@ export default {
       <div class="little-button" @click="showMiniGameFalse"><a>Close</a></div>
     </div>
   </div>
-  <div class="overlay" @click="gameOver || (!gameStarted && !gameCountdownVisible ) ? showMiniGameFalse() : null"></div>
+  <div class="overlay"></div>
 </template>
 
 <style scoped>

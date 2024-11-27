@@ -145,7 +145,7 @@ import {authService} from "@/services/auth";
 export default {
   data() {
     return {
-      balance: 10000,
+      balance: 0,
       save: 0,
       maximumBalance: 0,
       bet: 10,
@@ -975,9 +975,9 @@ export default {
 
     loadEnemiesCharacteristics() {
       for(const enemy of this.enemies){
-        enemy.speed = enemy.speed + 5 * this.chosenLeague;
-        enemy.strength = enemy.strength + 5 * this.chosenLeague;
-        enemy.durability = enemy.durability + 5 * this.chosenLeague;
+        enemy.speed = enemy.speed + 5 * (this.chosenLeague-1);
+        enemy.strength = enemy.strength + 5 * (this.chosenLeague-1);
+        enemy.durability = enemy.durability + 5 * (this.chosenLeague-1);
       }
     },
 

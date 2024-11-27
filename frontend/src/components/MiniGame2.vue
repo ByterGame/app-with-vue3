@@ -136,7 +136,7 @@ export default {
 
     <h2 v-if="gameEnded">{{ resultMessage }}<div class="little-button" @click="showMiniGameFalse"><a>Close</a></div></h2>
   </div>
-  <div class="overlay" @click="gameEnded || (!gameStarted && !gameCountdownVisible ) ? showMiniGameFalse() : null"></div>
+  <div class="overlay"></div>
 </template>
 
 
