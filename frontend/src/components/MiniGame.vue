@@ -118,7 +118,25 @@ export default {
     },
     showMiniGameFalse() {
       this.$emit('close', true);
+    },
+    closeGame() {
+      this.showMiniGameFalse();
+    },
+    handleKeyDown(event) {
+      if (event.key === "Enter" || event.key === "Escape") {
+        if (!this.gameStarted && !this.gameOver && event.key === "Enter") {
+          this.startGame();
+        } else if (this.gameOver) {
+          this.closeGame();
+        }
+      }
     }
+  },
+  mounted() {
+      window.addEventListener('keydown', this.handleKeyDown);
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 }
 </script>

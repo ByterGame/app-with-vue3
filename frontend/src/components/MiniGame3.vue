@@ -70,7 +70,7 @@ export default {
         },
 
       generatePoints() {
-          const pointTimerInterval = setInterval(() => {
+          setInterval(() => {
             this.enemyImage = this.getAnimationClass(Math.floor((Math.random() * 6)));
             this.randomX = Math.floor((Math.random() * 390)) + 80;
             this.randomY = Math.floor((Math.random() * 290)) + 80;
@@ -100,9 +100,25 @@ export default {
         },
       showMiniGameFalse(){
           this.$emit('close', true);
-      }
+      },
+        handleKeyDown(event) {
+              if (event.key === "Enter" || event.key === "Escape") {
+                  if (!this.gameStarted && !this.gameEnded && event.key === "Enter") {
+                      this.startGame();
+                  } else if (this.gameEnded) {
+                      this.endGame(false);
+                      this.showMiniGameFalse();
+                  }
+              }
+          }
+    },
+  mounted() {
+        window.addEventListener('keydown', this.handleKeyDown);
+    },
+    beforeUnmount() {
+        window.removeEventListener('keydown', this.handleKeyDown);
     }
-}
+  }
 </script>
 
 <template>
